@@ -23,7 +23,7 @@ const HistoryMessageSchema = z.object({
   parts: z.array(MessagePartSchema),
 });
 
-export const ChatbotInputSchema = z.object({
+const ChatbotInputSchema = z.object({
   history: z.array(HistoryMessageSchema).describe('The conversation history.'),
   message: z.string().describe('The latest user message.'),
   apiKey: z.string().min(1, { message: 'API Key is required.' }),
