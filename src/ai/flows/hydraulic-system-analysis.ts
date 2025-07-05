@@ -18,6 +18,7 @@ const AnalyzeHydraulicSystemInputSchema = z.object({
     .string()
     .describe('A description of the hydraulic issue, including the equipment type (e.g., Caterpillar bulldozer).'),
   apiKey: z.string().min(1, { message: 'API Key is required.' }),
+  apiEndpoint: z.string().optional(),
 });
 export type AnalyzeHydraulicSystemInput = z.infer<typeof AnalyzeHydraulicSystemInputSchema>;
 
@@ -43,7 +44,7 @@ const analyzeHydraulicSystemFlow = ai.defineFlow(
   },
   async (input) => {
     const keyAi = genkit({
-      plugins: [googleAI({ apiKey: input.apiKey })],
+      plugins: [googleAI({ apiKey: input.apiKey, ...(input.apiEndpoint && { apiEndpoint: input.apiEndpoint }) })],
     });
 
     const prompt = `Bạn là một kỹ thuật viên chuyên nghiệp với 20 năm kinh nghiệm chẩn đoán hệ thống thủy lực trong các thiết bị xây dựng như Komatsu, Hitachi, Caterpillar, Doosan, Volvo và Hyundai.

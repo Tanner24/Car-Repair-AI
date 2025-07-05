@@ -17,6 +17,7 @@ const ErrorCodeTroubleshootingInputSchema = z.object({
   errorCode: z.string().describe('The error code from the construction vehicle.'),
   vehicleModel: z.string().describe('The model of the construction vehicle (e.g., Komatsu PC200-8).'),
   apiKey: z.string().min(1, { message: 'API Key is required.' }),
+  apiEndpoint: z.string().optional(),
 });
 export type ErrorCodeTroubleshootingInput = z.infer<typeof ErrorCodeTroubleshootingInputSchema>;
 
@@ -38,7 +39,7 @@ const errorCodeTroubleshootingFlow = ai.defineFlow(
   },
   async (input) => {
     const keyAi = genkit({
-      plugins: [googleAI({ apiKey: input.apiKey })],
+      plugins: [googleAI({ apiKey: input.apiKey, ...(input.apiEndpoint && { apiEndpoint: input.apiEndpoint }) })],
     });
     
     const prompt = `Bạn là một kỹ thuật viên chuyên nghiệp với 20 năm kinh nghiệm sửa chữa các loại xe công trình như Komatsu, Hitachi, Caterpillar, Doosan, Volvo và Hyundai.
