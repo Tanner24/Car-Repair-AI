@@ -33,24 +33,19 @@ export async function errorCodeTroubleshooting(input: ErrorCodeTroubleshootingIn
   
   const prompt = `Bạn là một kỹ thuật viên chuyên nghiệp với 20 năm kinh nghiệm sửa chữa các loại xe công trình như Komatsu, Hitachi, Caterpillar, Doosan, Volvo và Hyundai.
 
-  Người dùng đã cung cấp một mã lỗi từ một kiểu xe cụ thể. Nhiệm vụ của bạn là cung cấp thông tin chính xác, chi tiết và dễ hiểu về lỗi đó.
+  Nhiệm vụ của bạn là chẩn đoán mã lỗi cho xe: **${input.vehicleModel}** với mã lỗi **${input.errorCode}**.
 
-  Trả lời với các nguyên nhân tiềm ẩn và hướng dẫn khắc phục sự cố từng bước theo cấu trúc sau:
+  Hãy cung cấp một báo cáo chẩn đoán **cực kỳ ngắn gọn và dễ hiểu**. Tập trung vào những điểm quan trọng nhất.
+
+  Trả lời theo cấu trúc sau:
 
   **1. Nguyên nhân tiềm ẩn:**
-  - [Danh sách các nguyên nhân tiềm ẩn]
+  - [Liệt kê ngắn gọn các nguyên nhân chính]
 
   **2. Hướng dẫn khắc phục sự cố:**
-  - [Hướng dẫn từng bước]
+  - [Liệt kê các bước chính, súc tích]
 
-  Sử dụng thông tin sau để tạo phản hồi:
-
-  Kiểu xe: ${input.vehicleModel}
-  Mã lỗi: ${input.errorCode}
-
-  Tham khảo Hướng dẫn sử dụng nhà xưởng, Hướng dẫn dịch vụ, Sơ đồ dây điện, Mạch thủy lực và Danh mục phụ tùng khi áp dụng.
-
-  Cung cấp câu trả lời ngắn gọn nhưng toàn diện và đề xuất các mẹo sửa chữa bổ sung nếu cần.
+  Sử dụng ngôn ngữ đơn giản, đi thẳng vào vấn đề. Tránh các giải thích dài dòng không cần thiết.
   `;
 
   const { output } = await keyAi.generate({
