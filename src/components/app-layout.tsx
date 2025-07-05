@@ -20,6 +20,7 @@ import {
   User,
   Settings,
   MessageCircle,
+  WandSparkles,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
@@ -50,6 +51,11 @@ const navItems = [
     href: "/maintenance",
     icon: BookMarked,
     label: "Tra cứu Tài liệu",
+  },
+  {
+    href: "/guided-diagnostics",
+    icon: WandSparkles,
+    label: "Chẩn đoán Hướng dẫn",
   },
   {
     href: "/chatbot",
