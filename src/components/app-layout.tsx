@@ -15,12 +15,12 @@ import {
 } from "@/components/ui/sidebar";
 import {
   Wrench,
-  Droplets,
   BookMarked,
   User,
   Settings,
   MessageCircle,
   WandSparkles,
+  Zap,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
@@ -44,8 +44,8 @@ const navItems = [
   },
   {
     href: "/hydraulic-analysis",
-    icon: Droplets,
-    label: "Phân tích thủy lực",
+    icon: Zap,
+    label: "Tra cứu mạch điện",
   },
   {
     href: "/maintenance",
