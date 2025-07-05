@@ -56,8 +56,8 @@ const errorCodeTroubleshootingFlow = ai.defineFlow(
 
   Sử dụng thông tin sau để tạo phản hồi:
 
-  Kiểu xe: {{{vehicleModel}}}
-  Mã lỗi: {{{errorCode}}}
+  Kiểu xe: ${input.vehicleModel}
+  Mã lỗi: ${input.errorCode}
 
   Tham khảo Hướng dẫn sử dụng nhà xưởng, Hướng dẫn dịch vụ, Sơ đồ dây điện, Mạch thủy lực và Danh mục phụ tùng khi áp dụng.
 
@@ -67,10 +67,6 @@ const errorCodeTroubleshootingFlow = ai.defineFlow(
     const { output } = await keyAi.generate({
       model: 'googleai/gemini-2.0-flash',
       prompt: prompt,
-      input: {
-        vehicleModel: input.vehicleModel,
-        errorCode: input.errorCode,
-      },
       output: {
         schema: ErrorCodeTroubleshootingOutputSchema,
       },

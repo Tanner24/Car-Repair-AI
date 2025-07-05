@@ -55,15 +55,12 @@ const analyzeHydraulicSystemFlow = ai.defineFlow(
   **Các bộ phận cần kiểm tra:** [danh sách các bộ phận]
   **Trình tự chẩn đoán:** [quy trình chẩn đoán từng bước]
 
-  Mô tả sự cố thủy lực: {{{issueDescription}}}
+  Mô tả sự cố thủy lực: ${input.issueDescription}
   `;
 
     const { output } = await keyAi.generate({
       model: 'googleai/gemini-2.0-flash',
       prompt: prompt,
-      input: {
-        issueDescription: input.issueDescription,
-      },
       output: {
         schema: AnalyzeHydraulicSystemOutputSchema,
       },
