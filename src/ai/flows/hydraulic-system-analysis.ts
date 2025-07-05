@@ -9,12 +9,15 @@
  */
 
 import {ai} from '@/ai/genkit';
+import {genkit} from 'genkit';
+import {googleAI} from '@genkit-ai/googleai';
 import {z} from 'genkit';
 
 const AnalyzeHydraulicSystemInputSchema = z.object({
   issueDescription: z
     .string()
     .describe('A description of the hydraulic issue, including the equipment type (e.g., Caterpillar bulldozer).'),
+  apiKey: z.string().min(1, { message: 'API Key is required.' }),
 });
 export type AnalyzeHydraulicSystemInput = z.infer<typeof AnalyzeHydraulicSystemInputSchema>;
 
@@ -32,11 +35,18 @@ export async function analyzeHydraulicSystem(input: AnalyzeHydraulicSystemInput)
   return analyzeHydraulicSystemFlow(input);
 }
 
-const prompt = ai.definePrompt({
-  name: 'analyzeHydraulicSystemPrompt',
-  input: {schema: AnalyzeHydraulicSystemInputSchema},
-  output: {schema: AnalyzeHydraulicSystemOutputSchema},
-  prompt: `Bạn là một kỹ thuật viên chuyên nghiệp với 20 năm kinh nghiệm chẩn đoán hệ thống thủy lực trong các thiết bị xây dựng như Komatsu, Hitachi, Caterpillar, Doosan, Volvo và Hyundai.
+const analyzeHydraulicSystemFlow = ai.defineFlow(
+  {
+    name: 'analyzeHydraulicSystemFlow',
+    inputSchema: AnalyzeHydraulicSystemInputSchema,
+    outputSchema: AnalyzeHydraulicSystemOutputSchema,
+  },
+  async (input) => {
+    const keyAi = genkit({
+      plugins: [googleAI({ apiKey: input.apiKey })],
+    });
+
+    const prompt = `Bạn là một kỹ thuật viên chuyên nghiệp với 20 năm kinh nghiệm chẩn đoán hệ thống thủy lực trong các thiết bị xây dựng như Komatsu, Hitachi, Caterpillar, Doosan, Volvo và Hyundai.
 
   Dựa trên mô tả của người dùng về sự cố thủy lực, hãy cung cấp danh sách các bộ phận cần kiểm tra và trình tự chẩn đoán chi tiết.
 
@@ -45,17 +55,18 @@ const prompt = ai.definePrompt({
   **Trình tự chẩn đoán:** [quy trình chẩn đoán từng bước]
 
   Mô tả sự cố thủy lực: {{{issueDescription}}}
-  `,
-});
+  `;
 
-const analyzeHydraulicSystemFlow = ai.defineFlow(
-  {
-    name: 'analyzeHydraulicSystemFlow',
-    inputSchema: AnalyzeHydraulicSystemInputSchema,
-    outputSchema: AnalyzeHydraulicSystemOutputSchema,
-  },
-  async input => {
-    const {output} = await prompt(input);
+    const { output } = await keyAi.generate({
+      model: 'googleai/gemini-2.0-flash',
+      prompt: prompt,
+      input: {
+        issueDescription: input.issueDescription,
+      },
+      output: {
+        schema: AnalyzeHydraulicSystemOutputSchema,
+      },
+    });
     return output!;
   }
 );
