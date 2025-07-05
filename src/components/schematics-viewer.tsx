@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import Image from "next/image";
+import ReactMarkdown from 'react-markdown';
 import {
   Card,
   CardContent,
@@ -19,14 +19,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Dialog,
-  DialogContent,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { AlertCircle, Eye, Loader2, Sparkles } from "lucide-react";
+import { AlertCircle, Loader2, Sparkles } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import Link from "next/link";
 import { generateTechnicalData, GenerateTechnicalDataInput, GenerateTechnicalDataOutput } from "@/ai/flows/schematic-generation-flow";
@@ -141,36 +136,23 @@ export function TechnicalDataViewer() {
                     <p>AI đang xử lý yêu cầu... việc này có thể mất một lúc.</p>
                  </div>
             ) : generatedOutput ? (
-                generatedOutput.outputType === 'image' ? (
-                    <Dialog>
-                    <DialogTrigger asChild>
-                        <button className="relative w-full h-full cursor-pointer group focus:outline-none">
-                        <Image
-                            src={generatedOutput.content}
-                            alt={`Dữ liệu cho ${model} - ${requestType}`}
-                            layout="fill"
-                            objectFit="contain"
-                            className="group-hover:opacity-50 transition-opacity"
+                generatedOutput.outputType === 'svg' ? (
+                    <ScrollArea className="w-full h-full bg-white rounded-md">
+                        <div
+                            className="w-full h-full p-4 [&>svg]:w-full [&>svg]:h-full"
+                            dangerouslySetInnerHTML={{ __html: generatedOutput.content }}
                         />
-                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white">
-                            <Eye className="w-10 h-10" />
-                            <p className="font-semibold mt-2">Xem ảnh</p>
-                        </div>
-                        </button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-6xl h-[90vh] p-2">
-                        <Image
-                        src={generatedOutput.content}
-                        alt={`Dữ liệu cho ${model} - ${requestType}`}
-                        layout="fill"
-                        objectFit="contain"
-                        />
-                    </DialogContent>
-                    </Dialog>
-                ) : (
-                    <ScrollArea className="w-full h-full bg-background rounded-md">
-                        <pre className="text-sm whitespace-pre-wrap font-code p-4">{generatedOutput.content}</pre>
                     </ScrollArea>
+                ) : generatedOutput.outputType === 'markdown' ? (
+                    <ScrollArea className="w-full h-full bg-background rounded-md">
+                        <div className="prose prose-sm dark:prose-invert max-w-none p-4">
+                            <ReactMarkdown>{generatedOutput.content}</ReactMarkdown>
+                        </div>
+                    </ScrollArea>
+                ) : (
+                    <div className="text-center text-muted-foreground">
+                        <p>Không có kết quả để hiển thị.</p>
+                    </div>
                 )
             ) : (
                 <div className="text-center text-muted-foreground">
