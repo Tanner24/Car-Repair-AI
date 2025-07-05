@@ -16,8 +16,7 @@ import {
 import {
   Wrench,
   Droplets,
-  CircuitBoard,
-  CalendarCheck,
+  BookMarked,
   User,
   Settings,
   MessageCircle,
@@ -48,14 +47,9 @@ const navItems = [
     label: "Phân tích thủy lực",
   },
   {
-    href: "/schematics",
-    icon: CircuitBoard,
-    label: "Dữ liệu Kỹ thuật",
-  },
-  {
     href: "/maintenance",
-    icon: CalendarCheck,
-    label: "Bảo trì",
+    icon: BookMarked,
+    label: "Tra cứu Tài liệu",
   },
   {
     href: "/chatbot",

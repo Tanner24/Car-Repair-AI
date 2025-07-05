@@ -1,14 +1,4 @@
-import { PageHeader } from "@/components/page-header";
-import { TechnicalDataViewer } from "@/components/schematics-viewer";
-
+// This page is no longer used and is redirected to the new lookup page.
 export default function SchematicsPage() {
-  return (
-    <div className="flex flex-col gap-8">
-      <PageHeader
-        title="Dữ liệu Kỹ thuật AI"
-        description="Tạo sơ đồ kỹ thuật hoặc dữ liệu sửa chữa bằng AI theo yêu cầu."
-      />
-      <TechnicalDataViewer />
-    </div>
-  );
+  return null;
 }
