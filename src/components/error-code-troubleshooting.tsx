@@ -26,7 +26,7 @@ import {
   errorCodeTroubleshooting,
   ErrorCodeTroubleshootingOutput,
 } from "@/ai/flows/error-code-troubleshooting";
-import { Loader2, AlertCircle } from "lucide-react";
+import { Loader2, AlertCircle, Wrench } from "lucide-react";
 import {
   Accordion,
   AccordionContent,
@@ -76,7 +76,8 @@ export default function ErrorCodeTroubleshooting() {
     });
   };
 
-  const parseInstructions = (text: string) => {
+  const parseInstructions = (text: string | undefined) => {
+    if (!text) return [];
     return text.split('\n').filter(line => line.trim().startsWith('-')).map(line => line.trim().substring(1).trim());
   }
 
@@ -179,6 +180,20 @@ export default function ErrorCodeTroubleshooting() {
                   ))}
                 </Accordion>
               </div>
+
+              {result.requiredTools && (
+                <div>
+                  <h3 className="font-semibold text-lg mb-2 font-headline flex items-center">
+                    <Wrench className="mr-2 h-5 w-5" />
+                    Dụng cụ cần thiết
+                  </h3>
+                  <ul className="list-disc pl-6 space-y-1 text-muted-foreground">
+                    {parseInstructions(result.requiredTools).map((tool, i) => (
+                      <li key={i}>{tool}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
           )}
         </CardContent>

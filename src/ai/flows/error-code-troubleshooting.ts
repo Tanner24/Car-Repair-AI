@@ -23,6 +23,7 @@ export type ErrorCodeTroubleshootingInput = z.infer<typeof ErrorCodeTroubleshoot
 const ErrorCodeTroubleshootingOutputSchema = z.object({
   potentialCauses: z.string().describe('A list of potential causes for the error code.'),
   troubleshootingInstructions: z.string().describe('Step-by-step troubleshooting instructions to diagnose the problem.'),
+  requiredTools: z.string().describe('A list of tools and equipment needed for the repair.'),
 });
 export type ErrorCodeTroubleshootingOutput = z.infer<typeof ErrorCodeTroubleshootingOutputSchema>;
 
@@ -44,6 +45,9 @@ export async function errorCodeTroubleshooting(input: ErrorCodeTroubleshootingIn
 
   **2. Hướng dẫn khắc phục sự cố:**
   - [Liệt kê các bước chính, súc tích]
+  
+  **3. Dụng cụ cần thiết:**
+  - [Liệt kê các dụng cụ và thiết bị cần thiết để thực hiện việc sửa chữa]
 
   Sử dụng ngôn ngữ đơn giản, đi thẳng vào vấn đề. Tránh các giải thích dài dòng không cần thiết.
   `;
