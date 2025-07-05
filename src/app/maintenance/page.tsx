@@ -5,8 +5,8 @@ export default function MaintenancePage() {
   return (
     <div className="flex flex-col gap-8">
       <PageHeader
-        title="Maintenance Scheduler"
-        description="Track and manage maintenance tasks for your fleet."
+        title="Lập lịch bảo trì"
+        description="Theo dõi và quản lý các công việc bảo trì cho đội xe của bạn."
       />
       <MaintenanceScheduler />
     </div>

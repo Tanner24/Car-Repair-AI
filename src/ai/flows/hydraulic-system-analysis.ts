@@ -36,15 +36,15 @@ const prompt = ai.definePrompt({
   name: 'analyzeHydraulicSystemPrompt',
   input: {schema: AnalyzeHydraulicSystemInputSchema},
   output: {schema: AnalyzeHydraulicSystemOutputSchema},
-  prompt: `You are an expert technician with 20 years of experience diagnosing hydraulic systems in construction equipment such as Komatsu, Hitachi, Caterpillar, Doosan, Volvo, and Hyundai.
+  prompt: `Bạn là một kỹ thuật viên chuyên nghiệp với 20 năm kinh nghiệm chẩn đoán hệ thống thủy lực trong các thiết bị xây dựng như Komatsu, Hitachi, Caterpillar, Doosan, Volvo và Hyundai.
 
-  Based on the user's description of the hydraulic issue, provide a list of components to check and a detailed diagnostic sequence.
+  Dựa trên mô tả của người dùng về sự cố thủy lực, hãy cung cấp danh sách các bộ phận cần kiểm tra và trình tự chẩn đoán chi tiết.
 
-  Respond in the following structure:
-  **Components to Check:** [list of components]
-  **Diagnostic Sequence:** [step-by-step diagnostic procedure]
+  Trả lời theo cấu trúc sau:
+  **Các bộ phận cần kiểm tra:** [danh sách các bộ phận]
+  **Trình tự chẩn đoán:** [quy trình chẩn đoán từng bước]
 
-  Hydraulic Issue Description: {{{issueDescription}}}
+  Mô tả sự cố thủy lực: {{{issueDescription}}}
   `,
 });
 

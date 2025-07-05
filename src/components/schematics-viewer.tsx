@@ -27,9 +27,9 @@ const vehicleModels = [
 ];
 
 const diagramTypes = [
-  { value: "wiring", label: "Wiring Diagram" },
-  { value: "hydraulic", label: "Hydraulic Circuit" },
-  { value: "parts", label: "Parts Catalog" },
+  { value: "wiring", label: "Sơ đồ dây" },
+  { value: "hydraulic", label: "Mạch thủy lực" },
+  { value: "parts", label: "Danh mục phụ tùng" },
 ];
 
 export function SchematicsViewer() {
@@ -42,18 +42,18 @@ export function SchematicsViewer() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Interactive Schematics</CardTitle>
+        <CardTitle>Sơ đồ tương tác</CardTitle>
         <CardDescription>
-          Select a vehicle and diagram type to view. Pan by scrolling.
+          Chọn một chiếc xe và loại sơ đồ để xem. Di chuyển bằng cách cuộn.
         </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
           <div className="space-y-2">
-            <Label htmlFor="model-select">Vehicle Model</Label>
+            <Label htmlFor="model-select">Kiểu xe</Label>
             <Select value={model} onValueChange={setModel}>
               <SelectTrigger id="model-select">
-                <SelectValue placeholder="Select a model" />
+                <SelectValue placeholder="Chọn một kiểu xe" />
               </SelectTrigger>
               <SelectContent>
                 {vehicleModels.map((m) => (
@@ -65,10 +65,10 @@ export function SchematicsViewer() {
             </Select>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="type-select">Diagram Type</Label>
+            <Label htmlFor="type-select">Loại sơ đồ</Label>
             <Select value={type} onValueChange={setType}>
               <SelectTrigger id="type-select">
-                <SelectValue placeholder="Select a diagram type" />
+                <SelectValue placeholder="Chọn một loại sơ đồ" />
               </SelectTrigger>
               <SelectContent>
                 {diagramTypes.map((t) => (
@@ -85,7 +85,7 @@ export function SchematicsViewer() {
                  <Image
                     key={imageKey}
                     src="https://placehold.co/1200x900.png"
-                    alt={`${model} ${type} schematic`}
+                    alt={`sơ đồ ${model} ${type}`}
                     layout="fill"
                     objectFit="contain"
                     data-ai-hint="technical diagram"

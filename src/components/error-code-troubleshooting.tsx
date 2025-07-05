@@ -36,8 +36,8 @@ import {
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 
 const formSchema = z.object({
-  errorCode: z.string().min(1, "Error code is required."),
-  vehicleModel: z.string().min(1, "Vehicle model is required."),
+  errorCode: z.string().min(1, "Yêu cầu mã lỗi."),
+  vehicleModel: z.string().min(1, "Yêu cầu kiểu xe."),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -94,9 +94,9 @@ export default function ErrorCodeTroubleshooting() {
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
       <Card>
         <CardHeader>
-          <CardTitle>Vehicle Information</CardTitle>
+          <CardTitle>Thông tin xe</CardTitle>
           <CardDescription>
-            Enter the vehicle model and the error code displayed.
+            Nhập kiểu xe và mã lỗi được hiển thị.
           </CardDescription>
         </CardHeader>
         <Form {...form}>
@@ -107,9 +107,9 @@ export default function ErrorCodeTroubleshooting() {
                 name="vehicleModel"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Vehicle Model</FormLabel>
+                    <FormLabel>Kiểu xe</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., Komatsu PC200-8" {...field} />
+                      <Input placeholder="ví dụ: Komatsu PC200-8" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -120,9 +120,9 @@ export default function ErrorCodeTroubleshooting() {
                 name="errorCode"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Error Code</FormLabel>
+                    <FormLabel>Mã lỗi</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., E02" {...field} />
+                      <Input placeholder="ví dụ: E02" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -132,7 +132,7 @@ export default function ErrorCodeTroubleshooting() {
             <CardFooter>
               <Button type="submit" disabled={isPending} className="bg-accent hover:bg-accent/90">
                 {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Analyze
+                Phân tích
               </Button>
             </CardFooter>
           </form>
@@ -141,9 +141,9 @@ export default function ErrorCodeTroubleshooting() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Diagnostic Report</CardTitle>
+          <CardTitle>Báo cáo chẩn đoán</CardTitle>
           <CardDescription>
-            Potential causes and troubleshooting steps will appear here.
+            Các nguyên nhân tiềm ẩn và các bước khắc phục sự cố sẽ xuất hiện ở đây.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -154,14 +154,14 @@ export default function ErrorCodeTroubleshooting() {
           )}
           {error && (
             <Alert variant="destructive">
-              <AlertTitle>Error</AlertTitle>
+              <AlertTitle>Lỗi</AlertTitle>
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
           {result && (
             <div className="space-y-6">
               <div>
-                <h3 className="font-semibold text-lg mb-2 font-headline">Potential Causes</h3>
+                <h3 className="font-semibold text-lg mb-2 font-headline">Nguyên nhân tiềm ẩn</h3>
                 <ul className="list-disc pl-6 space-y-1 text-muted-foreground">
                   {parseInstructions(result.potentialCauses).map((cause, i) => (
                     <li key={i}>{cause}</li>
@@ -169,11 +169,11 @@ export default function ErrorCodeTroubleshooting() {
                 </ul>
               </div>
               <div>
-                <h3 className="font-semibold text-lg mb-2 font-headline">Troubleshooting Instructions</h3>
+                <h3 className="font-semibold text-lg mb-2 font-headline">Hướng dẫn khắc phục sự cố</h3>
                 <Accordion type="single" collapsible className="w-full">
                   {parseInstructions(result.troubleshootingInstructions).map((step, i) => (
                      <AccordionItem value={`item-${i}`} key={i}>
-                       <AccordionTrigger>Step {i + 1}</AccordionTrigger>
+                       <AccordionTrigger>Bước {i + 1}</AccordionTrigger>
                        <AccordionContent>
                          {step}
                        </AccordionContent>

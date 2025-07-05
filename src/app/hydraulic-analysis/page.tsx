@@ -5,8 +5,8 @@ export default function HydraulicAnalysisPage() {
   return (
     <div className="flex flex-col gap-8">
       <PageHeader
-        title="Hydraulic System Analysis"
-        description="Describe a hydraulic issue to receive diagnostic suggestions."
+        title="Phân tích hệ thống thủy lực"
+        description="Mô tả sự cố thủy lực để nhận các đề xuất chẩn đoán."
       />
       <HydraulicAnalysis />
     </div>

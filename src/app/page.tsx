@@ -5,8 +5,8 @@ export default function Home() {
   return (
     <div className="flex flex-col gap-8">
       <PageHeader
-        title="Error Code Analysis"
-        description="Input an error code to get potential causes and troubleshooting steps."
+        title="Phân tích mã lỗi"
+        description="Nhập mã lỗi để nhận các nguyên nhân tiềm ẩn và các bước khắc phục sự cố."
       />
       <ErrorCodeTroubleshooting />
     </div>
