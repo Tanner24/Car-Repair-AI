@@ -23,7 +23,7 @@ export type ErrorCodeTroubleshootingInput = z.infer<typeof ErrorCodeTroubleshoot
 const ErrorCodeTroubleshootingOutputSchema = z.object({
   potentialCauses: z.string().describe('A list of potential causes for the error code.'),
   troubleshootingInstructions: z.string().describe('Step-by-step troubleshooting instructions to diagnose the problem.'),
-  requiredTools: z.string().describe('A list of tools and equipment needed for the repair.'),
+  requiredTools: z.string().describe('A detailed list of specific tools and consumables needed for the repair (e.g., "14mm wrench", "multimeter", "electrical tape", "zip ties").'),
 });
 export type ErrorCodeTroubleshootingOutput = z.infer<typeof ErrorCodeTroubleshootingOutputSchema>;
 
@@ -47,7 +47,7 @@ export async function errorCodeTroubleshooting(input: ErrorCodeTroubleshootingIn
   - [Liệt kê các bước chính, súc tích]
   
   **3. Dụng cụ cần thiết:**
-  - [Liệt kê các dụng cụ và thiết bị cần thiết để thực hiện việc sửa chữa]
+  - [Liệt kê **chi tiết và cụ thể** từng dụng cụ và vật tư tiêu hao. Ví dụ: thay vì "cờ lê", hãy ghi "cờ lê 14mm". Bao gồm cả những thứ như băng dính điện, dây rút, giẻ lau nếu cần thiết.]
 
   Sử dụng ngôn ngữ đơn giản, đi thẳng vào vấn đề. Tránh các giải thích dài dòng không cần thiết.
   `;
