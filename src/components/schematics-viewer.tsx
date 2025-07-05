@@ -13,7 +13,9 @@ import {
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -22,29 +24,37 @@ import {
   DialogContent,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { AlertCircle, Eye, Loader2, Sparkles } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 import Link from "next/link";
-import { generateSchematic, GenerateSchematicInput } from "@/ai/flows/schematic-generation-flow";
+import { generateTechnicalData, GenerateTechnicalDataInput, GenerateTechnicalDataOutput } from "@/ai/flows/schematic-generation-flow";
+import { ScrollArea } from "./ui/scroll-area";
 
-const diagramTypes = [
-  { value: "sơ đồ dây", label: "Sơ đồ dây" },
-  { value: "mạch thủy lực", label: "Mạch thủy lực" },
-  { value: "danh mục phụ tùng", label: "Danh mục phụ tùng" },
-];
+const technicalDiagrams = [
+    { value: "Sơ đồ dây điện", label: "Sơ đồ dây điện" },
+    { value: "Mạch thủy lực", label: "Mạch thủy lực" },
+    { value: "Mạch khí nén", label: "Mạch khí nén" },
+    { value: "Logic điều khiển ECU", label: "Logic điều khiển ECU" },
+    { value: "Bố trí linh kiện trên xe", label: "Bố trí linh kiện trên xe" },
+    { value: "Danh mục phụ tùng", label: "Sơ đồ nổ phụ tùng" },
+  ];
+  
+  const repairData = [
+    { value: "Bảng mã lỗi", label: "Bảng mã lỗi (DTC)" },
+    { value: "Quy trình bảo dưỡng định kỳ", label: "Quy trình bảo dưỡng" },
+  ];
 
-export function SchematicsViewer() {
+export function TechnicalDataViewer() {
   const [model, setModel] = useState("");
-  const [type, setType] = useState(diagramTypes[0].value);
-  const [generatedImage, setGeneratedImage] = useState<string | null>(null);
+  const [requestType, setRequestType] = useState(technicalDiagrams[0].value);
+  const [generatedOutput, setGeneratedOutput] = useState<GenerateTechnicalDataOutput | null>(null);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
   const handleGenerate = () => {
-    setGeneratedImage(null);
+    setGeneratedOutput(null);
     setError(null);
 
     if (!model.trim()) {
@@ -61,16 +71,16 @@ export function SchematicsViewer() {
 
     startTransition(async () => {
       try {
-        const input: GenerateSchematicInput = {
+        const input: GenerateTechnicalDataInput = {
           vehicleModel: model,
-          diagramType: type,
+          requestType: requestType as any,
           apiKey: apiKey,
           apiEndpoint: apiEndpoint ? apiEndpoint : undefined,
         };
-        const result = await generateSchematic(input);
-        setGeneratedImage(result.imageDataUri);
+        const result = await generateTechnicalData(input);
+        setGeneratedOutput(result);
       } catch (e) {
-        setError(e instanceof Error ? e.message : "Đã xảy ra lỗi không xác định khi tạo sơ đồ.");
+        setError(e instanceof Error ? e.message : "Đã xảy ra lỗi không xác định khi tạo dữ liệu.");
       }
     });
   };
@@ -78,9 +88,9 @@ export function SchematicsViewer() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Trình xem sơ đồ AI</CardTitle>
+        <CardTitle>Trình tạo dữ liệu kỹ thuật</CardTitle>
         <CardDescription>
-          Nhập một kiểu xe và chọn loại sơ đồ, sau đó yêu cầu AI tạo sơ đồ kỹ thuật chi tiết.
+          Nhập một kiểu xe và chọn loại sơ đồ hoặc dữ liệu, sau đó yêu cầu AI tạo kết quả.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -96,57 +106,74 @@ export function SchematicsViewer() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="type-select">Loại sơ đồ</Label>
-            <Select value={type} onValueChange={setType} disabled={isPending}>
+            <Label htmlFor="type-select">Loại dữ liệu</Label>
+            <Select value={requestType} onValueChange={setRequestType} disabled={isPending}>
               <SelectTrigger id="type-select">
-                <SelectValue placeholder="Chọn một loại sơ đồ" />
+                <SelectValue placeholder="Chọn một loại dữ liệu" />
               </SelectTrigger>
               <SelectContent>
-                {diagramTypes.map((t) => (
-                  <SelectItem key={t.value} value={t.value}>
-                    {t.label}
-                  </SelectItem>
-                ))}
+                <SelectGroup>
+                    <SelectLabel>Sơ đồ kỹ thuật</SelectLabel>
+                    {technicalDiagrams.map((t) => (
+                      <SelectItem key={t.value} value={t.value}>
+                        {t.label}
+                      </SelectItem>
+                    ))}
+                </SelectGroup>
+                <SelectGroup>
+                    <SelectLabel>Dữ liệu hỗ trợ sửa chữa</SelectLabel>
+                    {repairData.map((t) => (
+                      <SelectItem key={t.value} value={t.value}>
+                        {t.label}
+                      </SelectItem>
+                    ))}
+                </SelectGroup>
               </SelectContent>
             </Select>
           </div>
         </div>
         
-        <div className="w-full h-[60vh] border rounded-lg overflow-auto bg-muted/50 p-4 flex items-center justify-center">
+        <div className="w-full h-[60vh] border rounded-lg overflow-hidden bg-muted/50 p-4 flex items-center justify-center">
             {isPending ? (
                  <div className="flex flex-col items-center gap-2 text-muted-foreground">
                     <Loader2 className="h-8 w-8 animate-spin" />
-                    <p>AI đang vẽ sơ đồ... việc này có thể mất một lúc.</p>
+                    <p>AI đang xử lý yêu cầu... việc này có thể mất một lúc.</p>
                  </div>
-            ) : generatedImage ? (
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <button className="relative w-full h-full cursor-pointer group focus:outline-none">
-                      <Image
-                        src={generatedImage}
-                        alt={`sơ đồ ${model} ${type}`}
+            ) : generatedOutput ? (
+                generatedOutput.outputType === 'image' ? (
+                    <Dialog>
+                    <DialogTrigger asChild>
+                        <button className="relative w-full h-full cursor-pointer group focus:outline-none">
+                        <Image
+                            src={generatedOutput.content}
+                            alt={`Dữ liệu cho ${model} - ${requestType}`}
+                            layout="fill"
+                            objectFit="contain"
+                            className="group-hover:opacity-50 transition-opacity"
+                        />
+                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white">
+                            <Eye className="w-10 h-10" />
+                            <p className="font-semibold mt-2">Xem ảnh</p>
+                        </div>
+                        </button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-6xl h-[90vh] p-2">
+                        <Image
+                        src={generatedOutput.content}
+                        alt={`Dữ liệu cho ${model} - ${requestType}`}
                         layout="fill"
                         objectFit="contain"
-                        className="group-hover:opacity-50 transition-opacity"
-                      />
-                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white">
-                        <Eye className="w-10 h-10" />
-                        <p className="font-semibold mt-2">Xem ảnh</p>
-                      </div>
-                    </button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-6xl h-[90vh] p-2">
-                    <Image
-                      src={generatedImage}
-                      alt={`sơ đồ ${model} ${type}`}
-                      layout="fill"
-                      objectFit="contain"
-                    />
-                  </DialogContent>
-                </Dialog>
+                        />
+                    </DialogContent>
+                    </Dialog>
+                ) : (
+                    <ScrollArea className="w-full h-full bg-background rounded-md">
+                        <pre className="text-sm whitespace-pre-wrap font-code p-4">{generatedOutput.content}</pre>
+                    </ScrollArea>
+                )
             ) : (
                 <div className="text-center text-muted-foreground">
-                    <p>Sơ đồ được tạo bởi AI sẽ xuất hiện ở đây.</p>
+                    <p>Kết quả do AI tạo sẽ xuất hiện ở đây.</p>
                 </div>
             )}
         </div>
@@ -173,7 +200,7 @@ export function SchematicsViewer() {
             ) : (
               <Sparkles className="mr-2 h-4 w-4" />
             )}
-            Tạo sơ đồ
+            Tạo dữ liệu
           </Button>
       </CardFooter>
     </Card>
