@@ -60,7 +60,7 @@ const navItems = [
   {
     href: "/chatbot",
     icon: MessageCircle,
-    label: "Chatbot",
+    label: "Hỏi Đáp AI",
   },
   {
     href: "/settings",
