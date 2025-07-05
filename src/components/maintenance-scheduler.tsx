@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { AlertCircle, Loader2, Sparkles } from "lucide-react";
+import { AlertCircle, Download, Loader2, Sparkles } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import Link from "next/link";
 import { lookupTechnicalData, TechnicalLookupInput, TechnicalLookupOutput } from "@/ai/flows/schematic-generation-flow";
@@ -82,6 +82,25 @@ export function LookupTool() {
         setError(e instanceof Error ? e.message : "Đã xảy ra lỗi không xác định khi tra cứu tài liệu.");
       }
     });
+  };
+
+  const handleDownload = () => {
+    if (!generatedOutput) return;
+
+    const blob = new Blob([generatedOutput.content], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    
+    // Determine file extension based on content
+    const fileExtension = generatedOutput.content.trim().startsWith('<svg') ? 'svg' : 'md';
+    const fileName = `${model.replace(/ /g, '_')}_${requestType.replace(/ /g, '_')}.${fileExtension}`;
+    
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -189,7 +208,7 @@ export function LookupTool() {
             </Alert>
         )}
       </CardContent>
-      <CardFooter className="justify-start">
+      <CardFooter className="justify-start gap-2">
           <Button onClick={handleGenerate} disabled={isPending || !model.trim()} className="bg-accent hover:bg-accent/90">
             {isPending ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -198,6 +217,12 @@ export function LookupTool() {
             )}
             Tra cứu
           </Button>
+          {generatedOutput && !isPending && (
+            <Button onClick={handleDownload} variant="outline">
+              <Download className="mr-2 h-4 w-4" />
+              Tải xuống
+            </Button>
+          )}
       </CardFooter>
     </Card>
   );
