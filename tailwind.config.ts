@@ -11,11 +11,7 @@ export default {
     extend: {
       fontFamily: {
         body: ['Inter', 'sans-serif'],
-<<<<<<< HEAD
-        headline: ["'Space Grotesk'", 'sans-serif'],
-=======
         headline: ['Inter', 'sans-serif'],
->>>>>>> 3696b98 (initial scaffold)
         code: ['monospace'],
       },
       colors: {
@@ -99,9 +95,5 @@ export default {
       },
     },
   },
-<<<<<<< HEAD
-  plugins: [require('tailwindcss-animate'), require('@tailwindcss/typography')],
-=======
   plugins: [require('tailwindcss-animate')],
->>>>>>> 3696b98 (initial scaffold)
 } satisfies Config;
