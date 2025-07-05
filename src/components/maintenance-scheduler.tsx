@@ -49,6 +49,7 @@ const repairData = [
 export function LookupTool() {
   const [model, setModel] = useState("");
   const [requestType, setRequestType] = useState(technicalDiagrams[0].value);
+  const [errorCode, setErrorCode] = useState("");
   const [generatedOutput, setGeneratedOutput] = useState<GenerateTechnicalDataOutput | null>(null);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -76,6 +77,7 @@ export function LookupTool() {
         const input: GenerateTechnicalDataInput = {
           vehicleModel: model,
           requestType: requestType as any,
+          errorCode: errorCode || undefined,
           apiKey: apiKey,
           apiEndpoint: apiEndpoint ? apiEndpoint : undefined,
         };
@@ -143,7 +145,7 @@ export function LookupTool() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <div className="space-y-2">
             <Label htmlFor="model-input">Kiểu xe</Label>
             <Input
@@ -156,7 +158,16 @@ export function LookupTool() {
           </div>
           <div className="space-y-2">
             <Label htmlFor="type-select">Loại tài liệu</Label>
-            <Select value={requestType} onValueChange={setRequestType} disabled={isPending}>
+            <Select 
+              value={requestType} 
+              onValueChange={(value) => {
+                setRequestType(value);
+                if (value !== "DTC / Fault Code Manual") {
+                    setErrorCode("");
+                }
+              }} 
+              disabled={isPending}
+            >
               <SelectTrigger id="type-select">
                 <SelectValue placeholder="Chọn một loại tài liệu" />
               </SelectTrigger>
@@ -181,6 +192,19 @@ export function LookupTool() {
             </Select>
           </div>
         </div>
+
+        {requestType === 'DTC / Fault Code Manual' && (
+            <div className="space-y-2 mb-6">
+                <Label htmlFor="error-code-input">Mã lỗi (Tùy chọn)</Label>
+                <Input
+                    id="error-code-input"
+                    value={errorCode}
+                    onChange={(e) => setErrorCode(e.target.value)}
+                    placeholder="ví dụ: E02 (Để trống để tra cứu toàn bộ bảng mã lỗi)"
+                    disabled={isPending}
+                />
+            </div>
+        )}
         
         <div ref={contentRef} className="w-full h-[60vh] border rounded-lg overflow-hidden bg-muted/50 p-4 flex items-center justify-center">
             {isPending ? (
