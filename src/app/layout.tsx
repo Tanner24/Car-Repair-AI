@@ -4,8 +4,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { AppLayout } from "@/components/app-layout";
 
 export const metadata: Metadata = {
-  title: "Construction Pro Assistant",
-  description: "Expert assistance for construction vehicle repair and maintenance.",
+  title: "Trợ lý chuyên nghiệp xây dựng",
+  description: "Hỗ trợ chuyên gia sửa chữa và bảo dưỡng xe công trình.",
 };
 
 export default function RootLayout({
@@ -14,7 +14,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="vi" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />

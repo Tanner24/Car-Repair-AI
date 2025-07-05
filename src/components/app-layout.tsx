@@ -37,22 +37,22 @@ const navItems = [
   {
     href: "/",
     icon: Wrench,
-    label: "Error Codes",
+    label: "Mã lỗi",
   },
   {
     href: "/hydraulic-analysis",
     icon: Droplets,
-    label: "Hydraulic Analysis",
+    label: "Phân tích thủy lực",
   },
   {
     href: "/schematics",
     icon: CircuitBoard,
-    label: "Schematics",
+    label: "Sơ đồ",
   },
   {
     href: "/maintenance",
     icon: CalendarCheck,
-    label: "Maintenance",
+    label: "Bảo trì",
   },
 ];
 
@@ -67,7 +67,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             <div className="flex items-center gap-2">
               <Logo />
               <span className="text-lg font-semibold font-headline">
-                Construction Pro
+                Chuyên gia xây dựng
               </span>
             </div>
           </SidebarHeader>
@@ -107,17 +107,17 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             <DropdownMenuContent className="w-56" align="end" forceMount>
               <DropdownMenuLabel className="font-normal">
                 <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">Technician</p>
+                  <p className="text-sm font-medium leading-none">Kỹ thuật viên</p>
                   <p className="text-xs leading-none text-muted-foreground">
                     tech@example.com
                   </p>
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>Profile</DropdownMenuItem>
-              <DropdownMenuItem>Settings</DropdownMenuItem>
+              <DropdownMenuItem>Hồ sơ</DropdownMenuItem>
+              <DropdownMenuItem>Cài đặt</DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>Log out</DropdownMenuItem>
+              <DropdownMenuItem>Đăng xuất</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </header>

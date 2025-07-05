@@ -42,37 +42,37 @@ type Task = {
   task: string;
   vehicle: string;
   dueDate: string;
-  status: "Pending" | "Completed";
+  status: "Đang chờ xử lý" | "Đã hoàn thành";
 };
 
 const initialTasks: Task[] = [
   {
     id: 1,
-    task: "Engine Oil Change",
+    task: "Thay dầu động cơ",
     vehicle: "Komatsu PC200-8",
     dueDate: "2024-08-15",
-    status: "Pending",
+    status: "Đang chờ xử lý",
   },
   {
     id: 2,
-    task: "Hydraulic Filter Replacement",
+    task: "Thay bộ lọc thủy lực",
     vehicle: "CAT 320D",
     dueDate: "2024-08-20",
-    status: "Pending",
+    status: "Đang chờ xử lý",
   },
   {
     id: 3,
-    task: "Air Filter Check",
+    task: "Kiểm tra bộ lọc không khí",
     vehicle: "Hitachi EX120-5",
     dueDate: "2024-07-30",
-    status: "Completed",
+    status: "Đã hoàn thành",
   },
   {
     id: 4,
-    task: "Track Tension Adjustment",
+    task: "Điều chỉnh độ căng của xích",
     vehicle: "Komatsu PC200-8",
     dueDate: "2024-09-01",
-    status: "Pending",
+    status: "Đang chờ xử lý",
   },
 ];
 
@@ -88,7 +88,7 @@ export function MaintenanceScheduler() {
       task: formData.get("task") as string,
       vehicle: formData.get("vehicle") as string,
       dueDate: formData.get("dueDate") as string,
-      status: "Pending",
+      status: "Đang chờ xử lý",
     };
     setTasks([...tasks, newTask]);
     setIsDialogOpen(false);
@@ -100,7 +100,7 @@ export function MaintenanceScheduler() {
         task.id === id
           ? {
               ...task,
-              status: task.status === "Pending" ? "Completed" : "Pending",
+              status: task.status === "Đang chờ xử lý" ? "Đã hoàn thành" : "Đang chờ xử lý",
             }
           : task
       )
@@ -115,42 +115,42 @@ export function MaintenanceScheduler() {
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
-          <CardTitle>Upcoming Tasks</CardTitle>
+          <CardTitle>Nhiệm vụ sắp tới</CardTitle>
           <CardDescription>
-            A list of scheduled maintenance tasks for your equipment.
+            Danh sách các công việc bảo trì đã lên lịch cho thiết bị của bạn.
           </CardDescription>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button size="sm" className="bg-accent hover:bg-accent/90">
               <PlusCircle className="mr-2 h-4 w-4" />
-              Add Task
+              Thêm nhiệm vụ
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Add New Maintenance Task</DialogTitle>
+              <DialogTitle>Thêm nhiệm vụ bảo trì mới</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleAddTask}>
               <div className="grid gap-4 py-4">
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="task" className="text-right">Task</Label>
+                  <Label htmlFor="task" className="text-right">Nhiệm vụ</Label>
                   <Input id="task" name="task" className="col-span-3" required />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="vehicle" className="text-right">Vehicle</Label>
+                  <Label htmlFor="vehicle" className="text-right">Xe</Label>
                   <Input id="vehicle" name="vehicle" className="col-span-3" required />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="dueDate" className="text-right">Due Date</Label>
+                  <Label htmlFor="dueDate" className="text-right">Ngày hết hạn</Label>
                   <Input id="dueDate" name="dueDate" type="date" className="col-span-3" required />
                 </div>
               </div>
               <DialogFooter>
                 <DialogClose asChild>
-                  <Button type="button" variant="secondary">Cancel</Button>
+                  <Button type="button" variant="secondary">Hủy</Button>
                 </DialogClose>
-                <Button type="submit" className="bg-accent hover:bg-accent/90">Add Task</Button>
+                <Button type="submit" className="bg-accent hover:bg-accent/90">Thêm nhiệm vụ</Button>
               </DialogFooter>
             </form>
           </DialogContent>
@@ -160,11 +160,11 @@ export function MaintenanceScheduler() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Status</TableHead>
-              <TableHead>Task</TableHead>
-              <TableHead>Vehicle</TableHead>
-              <TableHead>Due Date</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>Trạng thái</TableHead>
+              <TableHead>Nhiệm vụ</TableHead>
+              <TableHead>Xe</TableHead>
+              <TableHead>Ngày hết hạn</TableHead>
+              <TableHead className="text-right">Hành động</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -172,8 +172,8 @@ export function MaintenanceScheduler() {
               <TableRow key={task.id}>
                 <TableCell>
                   <Badge
-                    variant={task.status === "Completed" ? "secondary" : "default"}
-                    className={task.status === "Completed" ? "" : "bg-accent text-accent-foreground"}
+                    variant={task.status === "Đã hoàn thành" ? "secondary" : "default"}
+                    className={task.status === "Đã hoàn thành" ? "" : "bg-accent text-accent-foreground"}
                   >
                     {task.status}
                   </Badge>
@@ -192,11 +192,11 @@ export function MaintenanceScheduler() {
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem onClick={() => toggleStatus(task.id)}>
                         <CheckCircle2 className="mr-2 h-4 w-4" />
-                        <span>Toggle Status</span>
+                        <span>Chuyển đổi trạng thái</span>
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => deleteTask(task.id)} className="text-destructive">
                         <Trash2 className="mr-2 h-4 w-4" />
-                        <span>Delete</span>
+                        <span>Xóa</span>
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>

@@ -32,7 +32,7 @@ import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 const formSchema = z.object({
   issueDescription: z
     .string()
-    .min(10, "Please provide a detailed description of the issue."),
+    .min(10, "Vui lòng cung cấp mô tả chi tiết về sự cố."),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -72,10 +72,9 @@ export function HydraulicAnalysis() {
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
       <Card>
         <CardHeader>
-          <CardTitle>Hydraulic Issue</CardTitle>
+          <CardTitle>Sự cố thủy lực</CardTitle>
           <CardDescription>
-            Describe the hydraulic problem in detail, including the equipment
-            type.
+            Mô tả chi tiết sự cố thủy lực, bao gồm cả loại thiết bị.
           </CardDescription>
         </CardHeader>
         <Form {...form}>
@@ -86,10 +85,10 @@ export function HydraulicAnalysis() {
                 name="issueDescription"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Issue Description</FormLabel>
+                    <FormLabel>Mô tả sự cố</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="e.g., Caterpillar bulldozer has slow hydraulic response on the main arm..."
+                        placeholder="ví dụ: Máy ủi Caterpillar có phản ứng thủy lực chậm trên tay đòn chính..."
                         className="min-h-[150px]"
                         {...field}
                       />
@@ -104,7 +103,7 @@ export function HydraulicAnalysis() {
                 {isPending && (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 )}
-                Analyze Issue
+                Phân tích sự cố
               </Button>
             </CardFooter>
           </form>
@@ -113,9 +112,9 @@ export function HydraulicAnalysis() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Diagnostic Suggestions</CardTitle>
+          <CardTitle>Đề xuất chẩn đoán</CardTitle>
           <CardDescription>
-            Recommended components to check and diagnostic steps.
+            Các thành phần được đề xuất để kiểm tra và các bước chẩn đoán.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -126,14 +125,14 @@ export function HydraulicAnalysis() {
           )}
           {error && (
             <Alert variant="destructive">
-              <AlertTitle>Error</AlertTitle>
+              <AlertTitle>Lỗi</AlertTitle>
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
           {result && (
             <div className="space-y-6">
               <div>
-                <h3 className="font-semibold text-lg mb-2 font-headline">Components to Check</h3>
+                <h3 className="font-semibold text-lg mb-2 font-headline">Các thành phần cần kiểm tra</h3>
                 <ul className="list-disc pl-6 space-y-1 text-muted-foreground">
                   {parseList(result.componentsToCheck).map((item, i) => (
                     <li key={i}>{item}</li>
@@ -141,7 +140,7 @@ export function HydraulicAnalysis() {
                 </ul>
               </div>
               <div>
-                <h3 className="font-semibold text-lg mb-2 font-headline">Diagnostic Sequence</h3>
+                <h3 className="font-semibold text-lg mb-2 font-headline">Trình tự chẩn đoán</h3>
                 <ol className="list-decimal pl-6 space-y-2 text-muted-foreground">
                   {parseList(result.diagnosticSequence).map((item, i) => (
                     <li key={i}>{item}</li>
