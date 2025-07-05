@@ -17,10 +17,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
-import { AlertCircle, Loader2, Sparkles } from "lucide-react";
+import { AlertCircle, Eye, Loader2, Sparkles } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 import Link from "next/link";
 import { generateSchematic, GenerateSchematicInput } from "@/ai/flows/schematic-generation-flow";
@@ -114,14 +119,31 @@ export function SchematicsViewer() {
                     <p>AI đang vẽ sơ đồ... việc này có thể mất một lúc.</p>
                  </div>
             ) : generatedImage ? (
-                <div className="relative w-full h-full">
-                    <Image
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <button className="relative w-full h-full cursor-pointer group focus:outline-none">
+                      <Image
                         src={generatedImage}
                         alt={`sơ đồ ${model} ${type}`}
                         layout="fill"
                         objectFit="contain"
+                        className="group-hover:opacity-50 transition-opacity"
+                      />
+                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white">
+                        <Eye className="w-10 h-10" />
+                        <p className="font-semibold mt-2">Xem ảnh</p>
+                      </div>
+                    </button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-6xl h-[90vh] p-2">
+                    <Image
+                      src={generatedImage}
+                      alt={`sơ đồ ${model} ${type}`}
+                      layout="fill"
+                      objectFit="contain"
                     />
-                </div>
+                  </DialogContent>
+                </Dialog>
             ) : (
                 <div className="text-center text-muted-foreground">
                     <p>Sơ đồ được tạo bởi AI sẽ xuất hiện ở đây.</p>
