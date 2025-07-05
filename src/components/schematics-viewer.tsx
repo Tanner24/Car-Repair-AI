@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import Image from "next/image";
 import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -17,41 +18,72 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "./ui/label";
+import { Button } from "./ui/button";
+import { AlertCircle, Loader2, Sparkles } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
+import Link from "next/link";
+import { generateSchematic, GenerateSchematicInput } from "@/ai/flows/schematic-generation-flow";
 
 const vehicleModels = [
-  { value: "komatsu-pc200-8", label: "Komatsu PC200-8" },
-  { value: "hitachi-ex120-5", label: "Hitachi EX120-5" },
-  { value: "cat-320d", label: "Caterpillar 320D" },
-  { value: "doosan-dx225", label: "Doosan DX225" },
-  { value: "volvo-ec210", label: "Volvo EC210" },
+  { value: "Komatsu PC200-8", label: "Komatsu PC200-8" },
+  { value: "Hitachi EX120-5", label: "Hitachi EX120-5" },
+  { value: "Caterpillar 320D", label: "Caterpillar 320D" },
+  { value: "Doosan DX225", label: "Doosan DX225" },
+  { value: "Volvo EC210", label: "Volvo EC210" },
 ];
 
 const diagramTypes = [
-  { value: "wiring", label: "Sơ đồ dây" },
-  { value: "hydraulic", label: "Mạch thủy lực" },
-  { value: "parts", label: "Danh mục phụ tùng" },
+  { value: "sơ đồ dây", label: "Sơ đồ dây" },
+  { value: "mạch thủy lực", label: "Mạch thủy lực" },
+  { value: "danh mục phụ tùng", label: "Danh mục phụ tùng" },
 ];
 
 export function SchematicsViewer() {
   const [model, setModel] = useState(vehicleModels[0].value);
   const [type, setType] = useState(diagramTypes[0].value);
-  
-  // Create a unique key for the image to force re-render on change
-  const imageKey = `${model}-${type}`;
+  const [generatedImage, setGeneratedImage] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+
+  const handleGenerate = () => {
+    setGeneratedImage(null);
+    setError(null);
+    const apiKey = localStorage.getItem("gemini_api_key");
+    if (!apiKey) {
+      setError("Vui lòng đặt Khóa API của bạn trong trang Cài đặt.");
+      return;
+    }
+    const apiEndpoint = localStorage.getItem("gemini_api_endpoint");
+
+    startTransition(async () => {
+      try {
+        const input: GenerateSchematicInput = {
+          vehicleModel: model,
+          diagramType: type,
+          apiKey: apiKey,
+          apiEndpoint: apiEndpoint ? apiEndpoint : undefined,
+        };
+        const result = await generateSchematic(input);
+        setGeneratedImage(result.imageDataUri);
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Đã xảy ra lỗi không xác định khi tạo sơ đồ.");
+      }
+    });
+  };
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Sơ đồ tương tác</CardTitle>
+        <CardTitle>Trình xem sơ đồ AI</CardTitle>
         <CardDescription>
-          Chọn một chiếc xe và loại sơ đồ để xem. Di chuyển bằng cách cuộn.
+          Chọn một kiểu xe và loại sơ đồ, sau đó yêu cầu AI tạo sơ đồ kỹ thuật chi tiết.
         </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
           <div className="space-y-2">
             <Label htmlFor="model-select">Kiểu xe</Label>
-            <Select value={model} onValueChange={setModel}>
+            <Select value={model} onValueChange={setModel} disabled={isPending}>
               <SelectTrigger id="model-select">
                 <SelectValue placeholder="Chọn một kiểu xe" />
               </SelectTrigger>
@@ -66,7 +98,7 @@ export function SchematicsViewer() {
           </div>
           <div className="space-y-2">
             <Label htmlFor="type-select">Loại sơ đồ</Label>
-            <Select value={type} onValueChange={setType}>
+            <Select value={type} onValueChange={setType} disabled={isPending}>
               <SelectTrigger id="type-select">
                 <SelectValue placeholder="Chọn một loại sơ đồ" />
               </SelectTrigger>
@@ -80,19 +112,54 @@ export function SchematicsViewer() {
             </Select>
           </div>
         </div>
-        <div className="w-full h-[60vh] border rounded-lg overflow-auto bg-muted/50 p-4">
-            <div className="relative w-[150%] h-[150%]">
-                 <Image
-                    key={imageKey}
-                    src="https://placehold.co/1200x900.png"
-                    alt={`sơ đồ ${model} ${type}`}
-                    layout="fill"
-                    objectFit="contain"
-                    data-ai-hint="technical diagram"
-                />
-            </div>
+        
+        <div className="w-full h-[60vh] border rounded-lg overflow-auto bg-muted/50 p-4 flex items-center justify-center">
+            {isPending ? (
+                 <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                    <Loader2 className="h-8 w-8 animate-spin" />
+                    <p>AI đang vẽ sơ đồ... việc này có thể mất một lúc.</p>
+                 </div>
+            ) : generatedImage ? (
+                <div className="relative w-full h-full">
+                    <Image
+                        src={generatedImage}
+                        alt={`sơ đồ ${model} ${type}`}
+                        layout="fill"
+                        objectFit="contain"
+                    />
+                </div>
+            ) : (
+                <div className="text-center text-muted-foreground">
+                    <p>Sơ đồ được tạo bởi AI sẽ xuất hiện ở đây.</p>
+                </div>
+            )}
         </div>
+        
+        {error && (
+            <Alert variant="destructive" className="mt-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Lỗi</AlertTitle>
+            <AlertDescription>
+                {error}
+                {error.includes("API") && (
+                <Button variant="link" asChild className="p-0 h-auto mt-2">
+                    <Link href="/settings">Đi tới Cài đặt để thêm khóa của bạn</Link>
+                </Button>
+                )}
+            </AlertDescription>
+            </Alert>
+        )}
       </CardContent>
+      <CardFooter>
+          <Button onClick={handleGenerate} disabled={isPending} className="bg-accent hover:bg-accent/90">
+            {isPending ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Sparkles className="mr-2 h-4 w-4" />
+            )}
+            Tạo sơ đồ
+          </Button>
+      </CardFooter>
     </Card>
   );
 }
