@@ -35,6 +35,7 @@ const svgRequestTypes = [
 const GenerateTechnicalDataInputSchema = z.object({
   vehicleModel: z.string().describe('The model of the construction vehicle.'),
   requestType: z.enum(requestTypes).describe('The type of diagram or data to generate.'),
+  errorCode: z.string().optional().describe('An optional error code to look up.'),
   apiKey: z.string().min(1, { message: 'API Key is required.' }),
   apiEndpoint: z.string().optional(),
 });
@@ -46,7 +47,9 @@ const GenerateTechnicalDataOutputSchema = z.object({
 });
 export type GenerateTechnicalDataOutput = z.infer<typeof GenerateTechnicalDataOutputSchema>;
 
-function getPromptForRequest(vehicleModel: string, requestType: string): string {
+function getPromptForRequest(input: GenerateTechnicalDataInput): string {
+    const { vehicleModel, requestType, errorCode } = input;
+
     const basePrompt = `Bạn là một AI kỹ thuật viên chuyên nghiệp, có quyền truy cập toàn bộ tài liệu kỹ thuật của các hãng xe công trình, xe tải, xe đặc chủng.
 Nhiệm vụ của bạn là tra cứu, trích xuất và diễn giải các tài liệu kỹ thuật gốc (OEM documents) theo yêu cầu người dùng cho xe: "${vehicleModel}".
 
@@ -72,6 +75,26 @@ Yêu cầu cụ thể là: "${requestType}".
         case "Service Manual":
             return basePrompt + "Hãy trích xuất và tóm tắt nội dung từ Service Manual. Tập trung vào các quy trình tháo lắp, thông số kỹ thuật, và các lưu ý quan trọng liên quan đến yêu cầu. Trình bày dưới dạng Markdown rõ ràng, có tiêu đề và các bước cụ thể.";
         case "DTC / Fault Code Manual":
+            if (errorCode) {
+                return `Bạn là một kỹ thuật viên chuyên nghiệp với 20 năm kinh nghiệm sửa chữa các loại xe công trình như Komatsu, Hitachi, Caterpillar, Doosan, Volvo và Hyundai.
+
+Nhiệm vụ của bạn là chẩn đoán mã lỗi **${errorCode}** cho xe: **${vehicleModel}**.
+
+Hãy cung cấp một báo cáo chẩn đoán **ngắn gọn, dễ hiểu nhưng đầy đủ chi tiết kỹ thuật**.
+
+Trả lời dưới dạng Markdown. Cấu trúc phải bao gồm:
+
+### Nguyên nhân tiềm ẩn
+- [Liệt kê ngắn gọn các nguyên nhân chính]
+
+### Hướng dẫn khắc phục sự cố
+- [Cung cấp các bước sửa chữa **chi tiết, theo thứ tự**. Mỗi bước phải rõ ràng và bao gồm các **thông số kỹ thuật cụ thể** cần đo lường nếu có. Ví dụ: 'Dùng đồng hồ vạn năng đo điện áp tại chân số 2 của giắc cắm, giá trị phải nằm trong khoảng 4.8V - 5.2V'.]
+
+### Dụng cụ cần thiết
+- [Liệt kê **chi tiết và cụ thể** từng dụng cụ và vật tư tiêu hao. Ví dụ: thay vì "cờ lê", hãy ghi "cờ lê 14mm". Bao gồm cả những thứ như băng dính điện, dây rút, giẻ lau nếu cần thiết.]
+
+Sử dụng ngôn ngữ đơn giản, đi thẳng vào vấn đề.`;
+            }
             return basePrompt + "Hãy cung cấp Bảng mã lỗi (DTC & Diagnostic) cho dòng xe này. Trình bày dưới dạng bảng Markdown. Bảng cần có các cột: 'Mã lỗi' (bao gồm mã OBD-II và mã riêng của hãng nếu có), 'Mô tả lỗi', 'Nguyên nhân phổ biến', và 'Hướng xử lý chi tiết'.";
         case "Maintenance Schedule":
             return basePrompt + "Hãy cung cấp Lịch bảo dưỡng định kỳ (Maintenance Schedule) cho xe này. Trình bày dưới dạng bảng Markdown theo từng mốc (ví dụ: 5.000km, 10.000km, 40.000km). Liệt kê các công việc cụ thể, loại và dung tích dầu/nhớt, và các thông số quan trọng như mô-men siết bu-lông.";
@@ -89,7 +112,7 @@ export async function generateTechnicalData(input: GenerateTechnicalDataInput): 
       plugins: [googleAI({ apiKey: input.apiKey, ...(input.apiEndpoint && { apiEndpoint: input.apiEndpoint }) })],
     });
 
-    const prompt = getPromptForRequest(input.vehicleModel, input.requestType);
+    const prompt = getPromptForRequest(input);
     
     if (svgRequestTypes.includes(input.requestType as any)) {
         const response = await keyAi.generate({
