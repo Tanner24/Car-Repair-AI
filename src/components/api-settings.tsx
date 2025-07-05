@@ -6,6 +6,7 @@ import { z } from "zod";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -27,6 +28,7 @@ import { useToast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
   apiKey: z.string().min(1, "Yêu cầu khóa API."),
+  apiEndpoint: z.string().url("Vui lòng nhập một URL hợp lệ.").optional().or(z.literal('')),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -40,6 +42,7 @@ export function ApiSettings() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       apiKey: "",
+      apiEndpoint: "",
     },
   });
 
@@ -48,14 +51,23 @@ export function ApiSettings() {
     if (storedApiKey) {
       form.setValue("apiKey", storedApiKey);
     }
+    const storedApiEndpoint = localStorage.getItem("gemini_api_endpoint");
+    if (storedApiEndpoint) {
+      form.setValue("apiEndpoint", storedApiEndpoint);
+    }
   }, [form]);
 
   const onSubmit = (values: FormValues) => {
     startTransition(() => {
       localStorage.setItem("gemini_api_key", values.apiKey);
+      if (values.apiEndpoint) {
+        localStorage.setItem("gemini_api_endpoint", values.apiEndpoint);
+      } else {
+        localStorage.removeItem("gemini_api_endpoint");
+      }
       toast({
         title: "Thành công",
-        description: "Khóa API của bạn đã được lưu.",
+        description: "Cài đặt API của bạn đã được lưu.",
       });
     });
   };
@@ -65,12 +77,12 @@ export function ApiSettings() {
       <CardHeader>
         <CardTitle>Khóa API Gemini</CardTitle>
         <CardDescription>
-          Nhập khóa API Google AI của bạn để kích hoạt các tính năng phân tích. Khóa của bạn được lưu trữ an toàn trong trình duyệt của bạn.
+          Nhập khóa API và điểm cuối của bạn. Khóa của bạn được lưu trữ an toàn trong trình duyệt của bạn.
         </CardDescription>
       </CardHeader>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
-          <CardContent>
+          <CardContent className="space-y-4">
             <FormField
               control={form.control}
               name="apiKey"
@@ -81,7 +93,7 @@ export function ApiSettings() {
                     <FormControl>
                       <Input
                         type={showApiKey ? "text" : "password"}
-                        placeholder="AIza..."
+                        placeholder="AIza... hoặc sk-..."
                         {...field}
                       />
                     </FormControl>
@@ -102,6 +114,25 @@ export function ApiSettings() {
                       </span>
                     </Button>
                   </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="apiEndpoint"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Điểm cuối API (Tùy chọn)</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="https://api.openrouter.ai/api/v1"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Tùy chọn. Sử dụng cho các dịch vụ proxy như OpenRouter.
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}

@@ -60,10 +60,11 @@ export function HydraulicAnalysis() {
       setError("Vui lòng đặt Khóa API của bạn trong trang Cài đặt.");
       return;
     }
+    const apiEndpoint = localStorage.getItem("gemini_api_endpoint");
 
     startTransition(async () => {
       try {
-        const res = await analyzeHydraulicSystem({ ...values, apiKey });
+        const res = await analyzeHydraulicSystem({ ...values, apiKey, apiEndpoint: apiEndpoint || undefined });
         setResult(res);
       } catch (e) {
         setError(e instanceof Error ? e.message : "An unknown error occurred.");
