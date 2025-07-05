@@ -27,12 +27,6 @@ import {
   ErrorCodeTroubleshootingOutput,
 } from "@/ai/flows/error-code-troubleshooting";
 import { Loader2, AlertCircle, Wrench } from "lucide-react";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 import Link from "next/link";
 
@@ -169,16 +163,11 @@ export default function ErrorCodeTroubleshooting() {
               </div>
               <div>
                 <h3 className="font-semibold text-lg mb-2 font-headline">Hướng dẫn khắc phục sự cố</h3>
-                <Accordion type="single" collapsible className="w-full">
-                  {parseInstructions(result.troubleshootingInstructions).map((step, i) => (
-                     <AccordionItem value={`item-${i}`} key={i}>
-                       <AccordionTrigger>Bước {i + 1}</AccordionTrigger>
-                       <AccordionContent>
-                         {step}
-                       </AccordionContent>
-                     </AccordionItem>
-                  ))}
-                </Accordion>
+                <ol className="list-decimal pl-6 space-y-2 text-muted-foreground">
+                    {parseInstructions(result.troubleshootingInstructions).map((step, i) => (
+                        <li key={i}>{step}</li>
+                    ))}
+                </ol>
               </div>
 
               {result.requiredTools && (
