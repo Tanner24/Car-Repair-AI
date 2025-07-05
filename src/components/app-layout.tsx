@@ -18,6 +18,7 @@ import {
   CircuitBoard,
   CalendarCheck,
   User,
+  Settings,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
@@ -53,6 +54,11 @@ const navItems = [
     href: "/maintenance",
     icon: CalendarCheck,
     label: "Bảo trì",
+  },
+  {
+    href: "/settings",
+    icon: Settings,
+    label: "Cài đặt",
   },
 ];
 
@@ -115,7 +121,9 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem>Hồ sơ</DropdownMenuItem>
-              <DropdownMenuItem>Cài đặt</DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/settings">Cài đặt</Link>
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem>Đăng xuất</DropdownMenuItem>
             </DropdownMenuContent>
