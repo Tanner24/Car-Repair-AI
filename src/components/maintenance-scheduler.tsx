@@ -1,211 +1,193 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
+import ReactMarkdown from 'react-markdown';
 import {
   Card,
   CardContent,
+  CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { PlusCircle, MoreHorizontal, Trash2, CheckCircle2 } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogFooter,
-  DialogClose,
-} from "@/components/ui/dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
+import { AlertCircle, Loader2, Sparkles } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import Link from "next/link";
+import { generateTechnicalData, GenerateTechnicalDataInput, GenerateTechnicalDataOutput } from "@/ai/flows/schematic-generation-flow";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Label } from "@/components/ui/label";
 
-type Task = {
-  id: number;
-  task: string;
-  vehicle: string;
-  dueDate: string;
-  status: "Đang chờ xử lý" | "Đã hoàn thành";
-};
-
-const initialTasks: Task[] = [
-  {
-    id: 1,
-    task: "Thay dầu động cơ",
-    vehicle: "Komatsu PC200-8",
-    dueDate: "2024-08-15",
-    status: "Đang chờ xử lý",
-  },
-  {
-    id: 2,
-    task: "Thay bộ lọc thủy lực",
-    vehicle: "CAT 320D",
-    dueDate: "2024-08-20",
-    status: "Đang chờ xử lý",
-  },
-  {
-    id: 3,
-    task: "Kiểm tra bộ lọc không khí",
-    vehicle: "Hitachi EX120-5",
-    dueDate: "2024-07-30",
-    status: "Đã hoàn thành",
-  },
-  {
-    id: 4,
-    task: "Điều chỉnh độ căng của xích",
-    vehicle: "Komatsu PC200-8",
-    dueDate: "2024-09-01",
-    status: "Đang chờ xử lý",
-  },
+const technicalDiagrams = [
+    { value: "Wiring Diagram", label: "Sơ đồ dây điện (Wiring Diagram)" },
+    { value: "Hydraulic Circuit", label: "Mạch thủy lực (Hydraulic Circuit)" },
+    { value: "Pneumatic System", label: "Hệ thống khí nén (Pneumatic System)" },
+    { value: "ECU Logic Flow", label: "Logic điều khiển ECU (ECU Logic Flow)" },
+    { value: "Parts Catalog", label: "Danh mục phụ tùng (Parts Catalog)" },
+];
+  
+const repairData = [
+    { value: "Service Manual", label: "Hướng dẫn sửa chữa (Service Manual)" },
+    { value: "DTC / Fault Code Manual", label: "Bảng mã lỗi (DTC Manual)" },
+    { value: "Maintenance Schedule", label: "Lịch bảo dưỡng (Maintenance Schedule)" },
+    { value: "Operator Manual", label: "Hướng dẫn vận hành (Operator Manual)" },
+    { value: "Technical Bulletin / TSB", label: "Bản tin kỹ thuật (TSB)" },
 ];
 
-export function MaintenanceScheduler() {
-  const [tasks, setTasks] = useState<Task[]>(initialTasks);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+export function LookupTool() {
+  const [model, setModel] = useState("");
+  const [requestType, setRequestType] = useState(technicalDiagrams[0].value);
+  const [generatedOutput, setGeneratedOutput] = useState<GenerateTechnicalDataOutput | null>(null);
+  const [isPending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
 
-  const handleAddTask = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const formData = new FormData(event.currentTarget);
-    const newTask: Task = {
-      id: tasks.length + 1,
-      task: formData.get("task") as string,
-      vehicle: formData.get("vehicle") as string,
-      dueDate: formData.get("dueDate") as string,
-      status: "Đang chờ xử lý",
-    };
-    setTasks([...tasks, newTask]);
-    setIsDialogOpen(false);
-  };
+  const handleGenerate = () => {
+    setGeneratedOutput(null);
+    setError(null);
 
-  const toggleStatus = (id: number) => {
-    setTasks(
-      tasks.map((task) =>
-        task.id === id
-          ? {
-              ...task,
-              status: task.status === "Đang chờ xử lý" ? "Đã hoàn thành" : "Đang chờ xử lý",
-            }
-          : task
-      )
-    );
-  };
+    if (!model.trim()) {
+      setError("Vui lòng nhập kiểu xe.");
+      return;
+    }
 
-  const deleteTask = (id: number) => {
-    setTasks(tasks.filter((task) => task.id !== id));
+    const apiKey = localStorage.getItem("gemini_api_key");
+    if (!apiKey) {
+      setError("Vui lòng đặt Khóa API của bạn trong trang Cài đặt.");
+      return;
+    }
+    const apiEndpoint = localStorage.getItem("gemini_api_endpoint");
+
+    startTransition(async () => {
+      try {
+        const input: GenerateTechnicalDataInput = {
+          vehicleModel: model,
+          requestType: requestType as any,
+          apiKey: apiKey,
+          apiEndpoint: apiEndpoint ? apiEndpoint : undefined,
+        };
+        const result = await generateTechnicalData(input);
+        setGeneratedOutput(result);
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Đã xảy ra lỗi không xác định khi tạo dữ liệu.");
+      }
+    });
   };
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
-        <div>
-          <CardTitle>Nhiệm vụ sắp tới</CardTitle>
-          <CardDescription>
-            Danh sách các công việc bảo trì đã lên lịch cho thiết bị của bạn.
-          </CardDescription>
-        </div>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button size="sm" className="bg-accent hover:bg-accent/90">
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Thêm nhiệm vụ
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Thêm nhiệm vụ bảo trì mới</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleAddTask}>
-              <div className="grid gap-4 py-4">
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="task" className="text-right">Nhiệm vụ</Label>
-                  <Input id="task" name="task" className="col-span-3" required />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="vehicle" className="text-right">Xe</Label>
-                  <Input id="vehicle" name="vehicle" className="col-span-3" required />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="dueDate" className="text-right">Ngày hết hạn</Label>
-                  <Input id="dueDate" name="dueDate" type="date" className="col-span-3" required />
-                </div>
-              </div>
-              <DialogFooter>
-                <DialogClose asChild>
-                  <Button type="button" variant="secondary">Hủy</Button>
-                </DialogClose>
-                <Button type="submit" className="bg-accent hover:bg-accent/90">Thêm nhiệm vụ</Button>
-              </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
+      <CardHeader>
+        <CardTitle>Công cụ tra cứu</CardTitle>
+        <CardDescription>
+          Nhập một kiểu xe và chọn loại tài liệu bạn muốn tra cứu hoặc tạo.
+        </CardDescription>
       </CardHeader>
       <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Trạng thái</TableHead>
-              <TableHead>Nhiệm vụ</TableHead>
-              <TableHead>Xe</TableHead>
-              <TableHead>Ngày hết hạn</TableHead>
-              <TableHead className="text-right">Hành động</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {tasks.map((task) => (
-              <TableRow key={task.id}>
-                <TableCell>
-                  <Badge
-                    variant={task.status === "Đã hoàn thành" ? "secondary" : "default"}
-                    className={task.status === "Đã hoàn thành" ? "" : "bg-accent text-accent-foreground"}
-                  >
-                    {task.status}
-                  </Badge>
-                </TableCell>
-                <TableCell className="font-medium">{task.task}</TableCell>
-                <TableCell>{task.vehicle}</TableCell>
-                <TableCell>{task.dueDate}</TableCell>
-                <TableCell className="text-right">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="h-8 w-8 p-0">
-                        <span className="sr-only">Open menu</span>
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => toggleStatus(task.id)}>
-                        <CheckCircle2 className="mr-2 h-4 w-4" />
-                        <span>Chuyển đổi trạng thái</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => deleteTask(task.id)} className="text-destructive">
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        <span>Xóa</span>
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          <div className="space-y-2">
+            <Label htmlFor="model-input">Kiểu xe</Label>
+            <Input
+              id="model-input"
+              value={model}
+              onChange={(e) => setModel(e.target.value)}
+              placeholder="ví dụ: Komatsu PC200-8"
+              disabled={isPending}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="type-select">Loại tài liệu</Label>
+            <Select value={requestType} onValueChange={setRequestType} disabled={isPending}>
+              <SelectTrigger id="type-select">
+                <SelectValue placeholder="Chọn một loại tài liệu" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                    <SelectLabel>Sơ đồ & Sơ đồ khối</SelectLabel>
+                    {technicalDiagrams.map((t) => (
+                      <SelectItem key={t.value} value={t.value}>
+                        {t.label}
+                      </SelectItem>
+                    ))}
+                </SelectGroup>
+                <SelectGroup>
+                    <SelectLabel>Tài liệu & Hướng dẫn</SelectLabel>
+                    {repairData.map((t) => (
+                      <SelectItem key={t.value} value={t.value}>
+                        {t.label}
+                      </SelectItem>
+                    ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        
+        <div className="w-full h-[60vh] border rounded-lg overflow-hidden bg-muted/50 p-4 flex items-center justify-center">
+            {isPending ? (
+                 <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                    <Loader2 className="h-8 w-8 animate-spin" />
+                    <p>AI đang xử lý yêu cầu... việc này có thể mất một lúc.</p>
+                 </div>
+            ) : generatedOutput ? (
+                generatedOutput.outputType === 'svg' ? (
+                    <ScrollArea className="w-full h-full bg-white rounded-md">
+                        <div
+                            className="w-full h-full p-4 [&>svg]:w-full [&>svg]:h-full"
+                            dangerouslySetInnerHTML={{ __html: generatedOutput.content }}
+                        />
+                    </ScrollArea>
+                ) : generatedOutput.outputType === 'markdown' ? (
+                    <ScrollArea className="w-full h-full bg-background rounded-md">
+                        <div className="prose prose-sm dark:prose-invert max-w-none p-4">
+                            <ReactMarkdown>{generatedOutput.content}</ReactMarkdown>
+                        </div>
+                    </ScrollArea>
+                ) : (
+                    <div className="text-center text-muted-foreground">
+                        <p>Không có kết quả để hiển thị.</p>
+                    </div>
+                )
+            ) : (
+                <div className="text-center text-muted-foreground">
+                    <p>Kết quả do AI tạo sẽ xuất hiện ở đây.</p>
+                </div>
+            )}
+        </div>
+        
+        {error && (
+            <Alert variant="destructive" className="mt-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Lỗi</AlertTitle>
+            <AlertDescription>
+                {error}
+                {error.includes("API") && (
+                <Button variant="link" asChild className="p-0 h-auto mt-2">
+                    <Link href="/settings">Đi tới Cài đặt để thêm khóa của bạn</Link>
+                </Button>
+                )}
+            </AlertDescription>
+            </Alert>
+        )}
       </CardContent>
+      <CardFooter>
+          <Button onClick={handleGenerate} disabled={isPending || !model.trim()} className="bg-accent hover:bg-accent/90">
+            {isPending ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Sparkles className="mr-2 h-4 w-4" />
+            )}
+            Tra cứu
+          </Button>
+      </CardFooter>
     </Card>
   );
 }

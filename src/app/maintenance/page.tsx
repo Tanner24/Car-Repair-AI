@@ -1,14 +1,14 @@
 import { PageHeader } from "@/components/page-header";
-import { MaintenanceScheduler } from "@/components/maintenance-scheduler";
+import { LookupTool } from "@/components/maintenance-scheduler";
 
-export default function MaintenancePage() {
+export default function LookupPage() {
   return (
     <div className="flex flex-col gap-8">
       <PageHeader
-        title="Lập lịch bảo trì"
-        description="Theo dõi và quản lý các công việc bảo trì cho đội xe của bạn."
+        title="Tra cứu Tài liệu Kỹ thuật"
+        description="Tra cứu, trích xuất và diễn giải tài liệu kỹ thuật gốc theo yêu cầu."
       />
-      <MaintenanceScheduler />
+      <LookupTool />
     </div>
   );
 }
