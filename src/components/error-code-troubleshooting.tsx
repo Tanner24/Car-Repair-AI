@@ -26,7 +26,7 @@ import {
   errorCodeTroubleshooting,
   ErrorCodeTroubleshootingOutput,
 } from "@/ai/flows/error-code-troubleshooting";
-import { Loader2 } from "lucide-react";
+import { Loader2, AlertCircle } from "lucide-react";
 import {
   Accordion,
   AccordionContent,
@@ -34,6 +34,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
+import Link from "next/link";
 
 const formSchema = z.object({
   errorCode: z.string().min(1, "Yêu cầu mã lỗi."),
@@ -58,33 +59,21 @@ export default function ErrorCodeTroubleshooting() {
   const onSubmit = (values: FormValues) => {
     setResult(null);
     setError(null);
+    const apiKey = localStorage.getItem("gemini_api_key");
+    if (!apiKey) {
+      setError("Vui lòng đặt Khóa API của bạn trong trang Cài đặt.");
+      return;
+    }
+
     startTransition(async () => {
       try {
-        const res = await errorCodeTroubleshooting(values);
+        const res = await errorCodeTroubleshooting({ ...values, apiKey });
         setResult(res);
       } catch (e) {
         setError(e instanceof Error ? e.message : "An unknown error occurred.");
       }
     });
   };
-
-  const parseAndRender = (text: string) => {
-    const sections = text.split(/\s*(?=\d\.\s)/).filter(Boolean);
-    return sections.map((section, index) => {
-      const lines = section.trim().split('\n');
-      const title = lines.shift() || '';
-      return (
-        <div key={index}>
-          <h3 className="font-semibold text-lg mt-4 mb-2">{title}</h3>
-          <ul className="list-disc pl-6 space-y-1 text-muted-foreground">
-            {lines.map((line, lineIndex) => (
-              <li key={lineIndex}>{line.replace(/^- /, '')}</li>
-            ))}
-          </ul>
-        </div>
-      );
-    });
-  }
 
   const parseInstructions = (text: string) => {
     return text.split('\n').filter(line => line.trim().startsWith('-')).map(line => line.trim().substring(1).trim());
@@ -153,9 +142,17 @@ export default function ErrorCodeTroubleshooting() {
             </div>
           )}
           {error && (
-            <Alert variant="destructive">
-              <AlertTitle>Lỗi</AlertTitle>
-              <AlertDescription>{error}</AlertDescription>
+             <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Lỗi</AlertTitle>
+                <AlertDescription>
+                {error}
+                {error.includes("API") && (
+                    <Button variant="link" asChild className="p-0 h-auto mt-2">
+                        <Link href="/settings">Đi tới Cài đặt để thêm khóa của bạn</Link>
+                    </Button>
+                )}
+                </AlertDescription>
             </Alert>
           )}
           {result && (

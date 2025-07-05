@@ -26,8 +26,9 @@ import {
   analyzeHydraulicSystem,
   AnalyzeHydraulicSystemOutput,
 } from "@/ai/flows/hydraulic-system-analysis";
-import { Loader2 } from "lucide-react";
+import { Loader2, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
+import Link from "next/link";
 
 const formSchema = z.object({
   issueDescription: z
@@ -54,9 +55,15 @@ export function HydraulicAnalysis() {
   const onSubmit = (values: FormValues) => {
     setResult(null);
     setError(null);
+    const apiKey = localStorage.getItem("gemini_api_key");
+    if (!apiKey) {
+      setError("Vui lòng đặt Khóa API của bạn trong trang Cài đặt.");
+      return;
+    }
+
     startTransition(async () => {
       try {
-        const res = await analyzeHydraulicSystem(values);
+        const res = await analyzeHydraulicSystem({ ...values, apiKey });
         setResult(res);
       } catch (e) {
         setError(e instanceof Error ? e.message : "An unknown error occurred.");
@@ -125,8 +132,16 @@ export function HydraulicAnalysis() {
           )}
           {error && (
             <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
               <AlertTitle>Lỗi</AlertTitle>
-              <AlertDescription>{error}</AlertDescription>
+              <AlertDescription>
+                {error}
+                {error.includes("API") && (
+                    <Button variant="link" asChild className="p-0 h-auto mt-2">
+                        <Link href="/settings">Đi tới Cài đặt để thêm khóa của bạn</Link>
+                    </Button>
+                )}
+              </AlertDescription>
             </Alert>
           )}
           {result && (

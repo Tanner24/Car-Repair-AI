@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -43,26 +43,29 @@ export function ApiSettings() {
     },
   });
 
+  useEffect(() => {
+    const storedApiKey = localStorage.getItem("gemini_api_key");
+    if (storedApiKey) {
+      form.setValue("apiKey", storedApiKey);
+    }
+  }, [form]);
+
   const onSubmit = (values: FormValues) => {
     startTransition(() => {
-      // In a real application, you would save this to a secure backend
-      // or environment variable configuration.
-      console.log("API Key submitted:", values.apiKey);
-      setTimeout(() => {
-        toast({
-          title: "Thành công",
-          description: "Khóa API của bạn đã được lưu.",
-        });
-      }, 1000);
+      localStorage.setItem("gemini_api_key", values.apiKey);
+      toast({
+        title: "Thành công",
+        description: "Khóa API của bạn đã được lưu.",
+      });
     });
   };
 
   return (
     <Card className="max-w-2xl">
       <CardHeader>
-        <CardTitle>Khóa API</CardTitle>
+        <CardTitle>Khóa API Gemini</CardTitle>
         <CardDescription>
-          Nhập khóa API của bạn để kích hoạt tích hợp AI.
+          Nhập khóa API Google AI của bạn để kích hoạt các tính năng phân tích. Khóa của bạn được lưu trữ an toàn trong trình duyệt của bạn.
         </CardDescription>
       </CardHeader>
       <Form {...form}>
@@ -78,7 +81,7 @@ export function ApiSettings() {
                     <FormControl>
                       <Input
                         type={showApiKey ? "text" : "password"}
-                        placeholder="sk-..."
+                        placeholder="AIza..."
                         {...field}
                       />
                     </FormControl>

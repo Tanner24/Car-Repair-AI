@@ -9,11 +9,14 @@
  */
 
 import {ai} from '@/ai/genkit';
+import {genkit} from 'genkit';
+import {googleAI} from '@genkit-ai/googleai';
 import {z} from 'genkit';
 
 const ErrorCodeTroubleshootingInputSchema = z.object({
   errorCode: z.string().describe('The error code from the construction vehicle.'),
   vehicleModel: z.string().describe('The model of the construction vehicle (e.g., Komatsu PC200-8).'),
+  apiKey: z.string().min(1, { message: 'API Key is required.' }),
 });
 export type ErrorCodeTroubleshootingInput = z.infer<typeof ErrorCodeTroubleshootingInputSchema>;
 
@@ -27,11 +30,18 @@ export async function errorCodeTroubleshooting(input: ErrorCodeTroubleshootingIn
   return errorCodeTroubleshootingFlow(input);
 }
 
-const prompt = ai.definePrompt({
-  name: 'errorCodeTroubleshootingPrompt',
-  input: {schema: ErrorCodeTroubleshootingInputSchema},
-  output: {schema: ErrorCodeTroubleshootingOutputSchema},
-  prompt: `Bạn là một kỹ thuật viên chuyên nghiệp với 20 năm kinh nghiệm sửa chữa các loại xe công trình như Komatsu, Hitachi, Caterpillar, Doosan, Volvo và Hyundai.
+const errorCodeTroubleshootingFlow = ai.defineFlow(
+  {
+    name: 'errorCodeTroubleshootingFlow',
+    inputSchema: ErrorCodeTroubleshootingInputSchema,
+    outputSchema: ErrorCodeTroubleshootingOutputSchema,
+  },
+  async (input) => {
+    const keyAi = genkit({
+      plugins: [googleAI({ apiKey: input.apiKey })],
+    });
+    
+    const prompt = `Bạn là một kỹ thuật viên chuyên nghiệp với 20 năm kinh nghiệm sửa chữa các loại xe công trình như Komatsu, Hitachi, Caterpillar, Doosan, Volvo và Hyundai.
 
   Người dùng đã cung cấp một mã lỗi từ một kiểu xe cụ thể. Nhiệm vụ của bạn là cung cấp thông tin chính xác, chi tiết và dễ hiểu về lỗi đó.
 
@@ -51,17 +61,19 @@ const prompt = ai.definePrompt({
   Tham khảo Hướng dẫn sử dụng nhà xưởng, Hướng dẫn dịch vụ, Sơ đồ dây điện, Mạch thủy lực và Danh mục phụ tùng khi áp dụng.
 
   Cung cấp câu trả lời ngắn gọn nhưng toàn diện và đề xuất các mẹo sửa chữa bổ sung nếu cần.
-  `,
-});
+  `;
 
-const errorCodeTroubleshootingFlow = ai.defineFlow(
-  {
-    name: 'errorCodeTroubleshootingFlow',
-    inputSchema: ErrorCodeTroubleshootingInputSchema,
-    outputSchema: ErrorCodeTroubleshootingOutputSchema,
-  },
-  async input => {
-    const {output} = await prompt(input);
+    const { output } = await keyAi.generate({
+      model: 'googleai/gemini-2.0-flash',
+      prompt: prompt,
+      input: {
+        vehicleModel: input.vehicleModel,
+        errorCode: input.errorCode,
+      },
+      output: {
+        schema: ErrorCodeTroubleshootingOutputSchema,
+      },
+    });
     return output!;
   }
 );
