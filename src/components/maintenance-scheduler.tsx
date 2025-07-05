@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useTransition, useRef } from "react";
-import ReactMarkdown from 'react-markdown';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import {
@@ -84,7 +83,7 @@ export function LookupTool() {
         const result = await generateTechnicalData(input);
         setGeneratedOutput(result);
       } catch (e) {
-        setError(e instanceof Error ? e.message : "Đã xảy ra lỗi không xác định khi tạo dữ liệu.");
+        setError(e instanceof Error ? e.message : "Đã xảy ra lỗi không xác định khi tra cứu tài liệu.");
       }
     });
   };
@@ -141,7 +140,7 @@ export function LookupTool() {
       <CardHeader>
         <CardTitle>Công cụ tra cứu</CardTitle>
         <CardDescription>
-          Nhập một kiểu xe và chọn loại tài liệu bạn muốn tra cứu hoặc tạo.
+          Nhập một kiểu xe và chọn loại tài liệu bạn muốn tra cứu, AI sẽ trả về hình ảnh của tài liệu đó.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -210,30 +209,21 @@ export function LookupTool() {
             {isPending ? (
                  <div className="flex flex-col items-center gap-2 text-muted-foreground">
                     <Loader2 className="h-8 w-8 animate-spin" />
-                    <p>AI đang xử lý yêu cầu... việc này có thể mất một lúc.</p>
+                    <p>AI đang tra cứu tài liệu... việc này có thể mất một lúc.</p>
                  </div>
             ) : generatedOutput ? (
-                generatedOutput.outputType === 'svg' ? (
-                    <ScrollArea className="w-full h-full bg-white rounded-md">
-                        <div
-                            className="w-full h-full p-4 [&>svg]:max-w-full [&>svg]:h-auto"
-                            dangerouslySetInnerHTML={{ __html: generatedOutput.content }}
-                        />
-                    </ScrollArea>
-                ) : generatedOutput.outputType === 'markdown' ? (
-                    <ScrollArea className="w-full h-full bg-background rounded-md">
-                        <div className="prose prose-sm dark:prose-invert max-w-none p-4">
-                            <ReactMarkdown>{generatedOutput.content}</ReactMarkdown>
-                        </div>
-                    </ScrollArea>
-                ) : (
-                    <div className="text-center text-muted-foreground">
-                        <p>Không có kết quả để hiển thị.</p>
-                    </div>
-                )
+                <ScrollArea className="w-full h-full bg-white rounded-md">
+                   <div className="flex items-center justify-center min-h-full p-4">
+                      <img
+                          src={generatedOutput.imageDataUri}
+                          alt={`${requestType} for ${model}`}
+                          className="w-full h-auto object-contain"
+                      />
+                   </div>
+                </ScrollArea>
             ) : (
                 <div className="text-center text-muted-foreground">
-                    <p>Kết quả do AI tạo sẽ xuất hiện ở đây.</p>
+                    <p>Hình ảnh tài liệu do AI tra cứu sẽ xuất hiện ở đây.</p>
                 </div>
             )}
         </div>
