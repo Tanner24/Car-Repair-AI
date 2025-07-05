@@ -68,7 +68,7 @@ export default function ErrorCodeTroubleshooting() {
 
     startTransition(async () => {
       try {
-        const res = await errorCodeTroubleshooting({ ...values, apiKey, apiEndpoint: apiEndpoint || undefined });
+        const res = await errorCodeTroubleshooting({ ...values, apiKey, apiEndpoint: apiEndpoint ? apiEndpoint : undefined });
         setResult(res);
       } catch (e) {
         setError(e instanceof Error ? e.message : "An unknown error occurred.");
