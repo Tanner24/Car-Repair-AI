@@ -11,7 +11,7 @@ import {genkit} from 'genkit';
 import {googleAI} from '@genkit-ai/googleai';
 import {z} from 'genkit';
 
-export const GenerateSchematicInputSchema = z.object({
+const GenerateSchematicInputSchema = z.object({
   vehicleModel: z.string().describe('The model of the construction vehicle.'),
   diagramType: z.string().describe('The type of diagram to generate (e.g., wiring, hydraulic).'),
   apiKey: z.string().min(1, { message: 'API Key is required.' }),
@@ -19,7 +19,7 @@ export const GenerateSchematicInputSchema = z.object({
 });
 export type GenerateSchematicInput = z.infer<typeof GenerateSchematicInputSchema>;
 
-export const GenerateSchematicOutputSchema = z.object({
+const GenerateSchematicOutputSchema = z.object({
   imageDataUri: z.string().describe("The generated image as a data URI."),
 });
 export type GenerateSchematicOutput = z.infer<typeof GenerateSchematicOutputSchema>;
