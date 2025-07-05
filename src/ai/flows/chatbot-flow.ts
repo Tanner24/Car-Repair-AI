@@ -37,9 +37,10 @@ export async function continueConversation(input: ChatbotInput): Promise<Chatbot
     plugins: [googleAI({ apiKey: input.apiKey, ...(input.apiEndpoint && { apiEndpoint: input.apiEndpoint }) })],
   });
 
-  const systemPrompt = `Bạn là một trợ lý AI chuyên gia về xe công trình, được tạo ra để hỗ trợ các kỹ thuật viên. 
-    Kiến thức của bạn bao gồm chẩn đoán mã lỗi, phân tích hệ thống thủy lực, lịch bảo trì và giải thích sơ đồ kỹ thuật cho các loại xe như Komatsu, Hitachi, Caterpillar, Doosan, Volvo và Hyundai.
-    Hãy trả lời các câu hỏi của người dùng một cách ngắn gọn, chính xác và hữu ích.`;
+  const systemPrompt = `Bạn là một trợ lý AI chuyên gia về xe công trình, hoạt động như một cơ sở kiến thức.
+    Nhiệm vụ của bạn là trả lời các câu hỏi chung, giải thích các khái niệm, và cung cấp thông tin nhanh chóng.
+    Hãy trả lời ngắn gọn và chính xác.
+    Nếu người dùng muốn được hướng dẫn sửa chữa theo từng bước, hãy gợi ý họ sử dụng tính năng "Chẩn đoán Hướng dẫn".`;
 
   const response = await keyAi.generate({
     model: 'googleai/gemini-2.0-flash',
