@@ -22,12 +22,17 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { AlertCircle, Loader2, Sparkles, Download } from "lucide-react";
+import { AlertCircle, Loader2, Sparkles, Download, ZoomIn } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import Link from "next/link";
 import { generateTechnicalData, GenerateTechnicalDataInput, GenerateTechnicalDataOutput } from "@/ai/flows/schematic-generation-flow";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Label } from "@/components/ui/label";
+import {
+    Dialog,
+    DialogContent,
+    DialogTrigger,
+  } from "@/components/ui/dialog";
 
 const technicalDiagrams = [
     { value: "Wiring Diagram", label: "Sơ đồ dây điện (Wiring Diagram)" },
@@ -205,22 +210,43 @@ export function LookupTool() {
             </div>
         )}
         
-        <div ref={contentRef} className="w-full h-[60vh] border rounded-lg overflow-hidden bg-muted/50 p-4 flex items-center justify-center">
+        <div className="w-full h-[60vh] border rounded-lg overflow-hidden bg-muted/50 p-4 flex items-center justify-center">
             {isPending ? (
                  <div className="flex flex-col items-center gap-2 text-muted-foreground">
                     <Loader2 className="h-8 w-8 animate-spin" />
                     <p>AI đang tra cứu tài liệu... việc này có thể mất một lúc.</p>
                  </div>
             ) : generatedOutput ? (
-                <ScrollArea className="w-full h-full bg-white rounded-md">
-                   <div className="flex items-center justify-center min-h-full p-4">
-                      <img
-                          src={generatedOutput.imageDataUri}
-                          alt={`${requestType} for ${model}`}
-                          className="w-full h-auto object-contain"
-                      />
-                   </div>
-                </ScrollArea>
+                <Dialog>
+                    <div className="relative w-full h-full group">
+                        <div ref={contentRef} className="w-full h-full bg-white rounded-md">
+                            <ScrollArea className="w-full h-full">
+                            <div className="flex items-center justify-center min-h-full p-4">
+                                <img
+                                    src={generatedOutput.imageDataUri}
+                                    alt={`${requestType} for ${model}`}
+                                    className="w-full h-auto object-contain"
+                                />
+                            </div>
+                            </ScrollArea>
+                        </div>
+                        <DialogTrigger asChild>
+                            <Button variant="outline" size="icon" className="absolute top-2 right-2 bg-background/50 backdrop-blur-sm hover:bg-background/75">
+                                <ZoomIn className="h-5 w-5" />
+                                <span className="sr-only">Phóng to</span>
+                            </Button>
+                        </DialogTrigger>
+                    </div>
+                    <DialogContent className="max-w-6xl h-[90vh] p-2">
+                        <ScrollArea className="w-full h-full">
+                            <img
+                                src={generatedOutput.imageDataUri}
+                                alt={`${requestType} for ${model}`}
+                                className="w-full h-auto object-contain"
+                            />
+                        </ScrollArea>
+                    </DialogContent>
+                </Dialog>
             ) : (
                 <div className="text-center text-muted-foreground">
                     <p>Hình ảnh tài liệu do AI tra cứu sẽ xuất hiện ở đây.</p>
