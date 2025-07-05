@@ -80,7 +80,7 @@ export function Chatbot() {
             history: messages,
             message: values.message,
             apiKey: apiKey,
-            apiEndpoint: apiEndpoint || undefined,
+            apiEndpoint: apiEndpoint ? apiEndpoint : undefined,
         };
         const responseText = await continueConversation(input);
         setMessages([

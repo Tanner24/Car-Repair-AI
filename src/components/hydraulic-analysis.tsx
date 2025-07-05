@@ -64,7 +64,7 @@ export function HydraulicAnalysis() {
 
     startTransition(async () => {
       try {
-        const res = await analyzeHydraulicSystem({ ...values, apiKey, apiEndpoint: apiEndpoint || undefined });
+        const res = await analyzeHydraulicSystem({ ...values, apiKey, apiEndpoint: apiEndpoint ? apiEndpoint : undefined });
         setResult(res);
       } catch (e) {
         setError(e instanceof Error ? e.message : "An unknown error occurred.");
