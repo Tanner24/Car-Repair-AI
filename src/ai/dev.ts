@@ -1,1 +1,5 @@
-// Flows will be imported for their side effects in this file.
+import { config } from 'dotenv';
+config();
+
+import '@/ai/flows/error-code-troubleshooting.ts';
+import '@/ai/flows/hydraulic-system-analysis.ts';
