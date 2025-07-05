@@ -11,6 +11,7 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
   SidebarTrigger,
+  SidebarMenuSkeleton,
 } from "@/components/ui/sidebar";
 import {
   Wrench,
@@ -68,8 +69,34 @@ const navItems = [
   },
 ];
 
-export function AppLayout({ children }: { children: React.ReactNode }) {
+function ClientNav() {
   const pathname = usePathname();
+  return (
+      <SidebarMenu>
+          {navItems.map((item) => (
+              <SidebarMenuItem key={item.href}>
+                  <SidebarMenuButton
+                      asChild
+                      isActive={pathname === item.href}
+                      tooltip={item.label}
+                  >
+                      <Link href={item.href}>
+                          <item.icon />
+                          <span>{item.label}</span>
+                      </Link>
+                  </SidebarMenuButton>
+              </SidebarMenuItem>
+          ))}
+      </SidebarMenu>
+  );
+}
+
+export function AppLayout({ children }: { children: React.ReactNode }) {
+  const [isClient, setIsClient] = React.useState(false)
+
+  React.useEffect(() => {
+    setIsClient(true)
+  }, [])
 
   return (
     <SidebarProvider>
@@ -83,22 +110,13 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               </span>
             </div>
           </SidebarHeader>
-          <SidebarMenu>
-            {navItems.map((item) => (
-              <SidebarMenuItem key={item.href}>
-                <SidebarMenuButton
-                  asChild
-                  isActive={pathname === item.href}
-                  tooltip={item.label}
-                >
-                  <Link href={item.href}>
-                    <item.icon />
-                    <span>{item.label}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
-          </SidebarMenu>
+           {isClient ? <ClientNav /> : (
+            <div className="flex flex-col gap-1 p-2">
+              {navItems.map((item) => (
+                <SidebarMenuSkeleton key={item.href} showIcon />
+              ))}
+            </div>
+          )}
         </SidebarContent>
       </Sidebar>
       <SidebarInset className="flex flex-col h-svh p-4 md:p-6 lg:p-8">
