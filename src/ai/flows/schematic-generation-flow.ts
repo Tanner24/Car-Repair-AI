@@ -24,7 +24,7 @@ const requestTypes = [
   "Technical Bulletin / TSB"
 ] as const;
 
-export const TechnicalLookupInputSchema = z.object({
+const TechnicalLookupInputSchema = z.object({
   vehicleModel: z.string().describe('The model of the construction vehicle.'),
   requestType: z.enum(requestTypes).describe('The type of diagram or data to generate.'),
   errorCode: z.string().optional().describe('An optional error code to look up if the request type is for a DTC manual.'),
