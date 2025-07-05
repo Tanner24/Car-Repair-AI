@@ -18,19 +18,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "./ui/label";
+import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { AlertCircle, Loader2, Sparkles } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 import Link from "next/link";
 import { generateSchematic, GenerateSchematicInput } from "@/ai/flows/schematic-generation-flow";
-
-const vehicleModels = [
-  { value: "Komatsu PC200-8", label: "Komatsu PC200-8" },
-  { value: "Hitachi EX120-5", label: "Hitachi EX120-5" },
-  { value: "Caterpillar 320D", label: "Caterpillar 320D" },
-  { value: "Doosan DX225", label: "Doosan DX225" },
-  { value: "Volvo EC210", label: "Volvo EC210" },
-];
 
 const diagramTypes = [
   { value: "sơ đồ dây", label: "Sơ đồ dây" },
@@ -39,7 +32,7 @@ const diagramTypes = [
 ];
 
 export function SchematicsViewer() {
-  const [model, setModel] = useState(vehicleModels[0].value);
+  const [model, setModel] = useState("");
   const [type, setType] = useState(diagramTypes[0].value);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -48,6 +41,12 @@ export function SchematicsViewer() {
   const handleGenerate = () => {
     setGeneratedImage(null);
     setError(null);
+
+    if (!model.trim()) {
+      setError("Vui lòng nhập kiểu xe.");
+      return;
+    }
+
     const apiKey = localStorage.getItem("gemini_api_key");
     if (!apiKey) {
       setError("Vui lòng đặt Khóa API của bạn trong trang Cài đặt.");
@@ -76,25 +75,20 @@ export function SchematicsViewer() {
       <CardHeader>
         <CardTitle>Trình xem sơ đồ AI</CardTitle>
         <CardDescription>
-          Chọn một kiểu xe và loại sơ đồ, sau đó yêu cầu AI tạo sơ đồ kỹ thuật chi tiết.
+          Nhập một kiểu xe và chọn loại sơ đồ, sau đó yêu cầu AI tạo sơ đồ kỹ thuật chi tiết.
         </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
           <div className="space-y-2">
-            <Label htmlFor="model-select">Kiểu xe</Label>
-            <Select value={model} onValueChange={setModel} disabled={isPending}>
-              <SelectTrigger id="model-select">
-                <SelectValue placeholder="Chọn một kiểu xe" />
-              </SelectTrigger>
-              <SelectContent>
-                {vehicleModels.map((m) => (
-                  <SelectItem key={m.value} value={m.value}>
-                    {m.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Label htmlFor="model-input">Kiểu xe</Label>
+            <Input
+              id="model-input"
+              value={model}
+              onChange={(e) => setModel(e.target.value)}
+              placeholder="ví dụ: Komatsu PC200-8"
+              disabled={isPending}
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="type-select">Loại sơ đồ</Label>
@@ -151,7 +145,7 @@ export function SchematicsViewer() {
         )}
       </CardContent>
       <CardFooter>
-          <Button onClick={handleGenerate} disabled={isPending} className="bg-accent hover:bg-accent/90">
+          <Button onClick={handleGenerate} disabled={isPending || !model.trim()} className="bg-accent hover:bg-accent/90">
             {isPending ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (
