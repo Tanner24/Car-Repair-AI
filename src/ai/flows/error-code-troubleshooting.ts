@@ -36,7 +36,7 @@ export async function errorCodeTroubleshooting(input: ErrorCodeTroubleshootingIn
 
   Nhiệm vụ của bạn là chẩn đoán mã lỗi cho xe: **${input.vehicleModel}** với mã lỗi **${input.errorCode}**.
 
-  Hãy cung cấp một báo cáo chẩn đoán **cực kỳ ngắn gọn và dễ hiểu**. Tập trung vào những điểm quan trọng nhất.
+  Hãy cung cấp một báo cáo chẩn đoán **ngắn gọn, dễ hiểu nhưng đầy đủ chi tiết kỹ thuật**.
 
   Trả lời theo cấu trúc sau:
 
@@ -44,12 +44,12 @@ export async function errorCodeTroubleshooting(input: ErrorCodeTroubleshootingIn
   - [Liệt kê ngắn gọn các nguyên nhân chính]
 
   **2. Hướng dẫn khắc phục sự cố:**
-  - [Liệt kê các bước chính, súc tích]
+  - [Cung cấp các bước sửa chữa **chi tiết, theo thứ tự**. Mỗi bước phải rõ ràng và bao gồm các **thông số kỹ thuật cụ thể** cần đo lường nếu có. Ví dụ: 'Dùng đồng hồ vạn năng đo điện áp tại chân số 2 của giắc cắm, giá trị phải nằm trong khoảng 4.8V - 5.2V'.]
   
   **3. Dụng cụ cần thiết:**
   - [Liệt kê **chi tiết và cụ thể** từng dụng cụ và vật tư tiêu hao. Ví dụ: thay vì "cờ lê", hãy ghi "cờ lê 14mm". Bao gồm cả những thứ như băng dính điện, dây rút, giẻ lau nếu cần thiết.]
 
-  Sử dụng ngôn ngữ đơn giản, đi thẳng vào vấn đề. Tránh các giải thích dài dòng không cần thiết.
+  Sử dụng ngôn ngữ đơn giản, đi thẳng vào vấn đề.
   `;
 
   const { output } = await keyAi.generate({
