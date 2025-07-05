@@ -12,16 +12,16 @@ import {googleAI} from '@genkit-ai/googleai';
 import {z} from 'genkit';
 
 const requestTypes = [
-  "Service Manual",
-  "Wiring Diagram",
-  "Hydraulic Circuit",
-  "Pneumatic System",
-  "Parts Catalog",
-  "DTC / Fault Code Manual",
-  "Maintenance Schedule",
-  "ECU Logic Flow",
-  "Operator Manual",
-  "Technical Bulletin / TSB"
+  "Hướng dẫn sửa chữa",
+  "Sơ đồ dây điện",
+  "Mạch thủy lực",
+  "Hệ thống khí nén",
+  "Danh mục phụ tùng",
+  "Bảng mã lỗi",
+  "Lịch bảo dưỡng",
+  "Logic điều khiển ECU",
+  "Hướng dẫn vận hành",
+  "Bản tin kỹ thuật"
 ] as const;
 
 const TechnicalLookupInputSchema = z.object({
@@ -41,26 +41,26 @@ export type TechnicalLookupOutput = z.infer<typeof TechnicalLookupOutputSchema>;
 function getLookupPrompt(input: TechnicalLookupInput): string {
   const { vehicleModel, requestType, errorCode } = input;
 
-  let detail = `The user wants the "${requestType}" for a "${vehicleModel}".`;
+  let detail = `Người dùng muốn có tài liệu "${requestType}" cho xe "${vehicleModel}".`;
   let formatInstruction = `
-    - For textual data (Service Manuals, Parts Catalogs, Maintenance Schedules), provide key information in well-structured Markdown. Use tables, lists, and bold text.
-    - For diagrams (Wiring, Hydraulic, Pneumatic, ECU Logic), you MUST generate a valid, detailed SVG image. The SVG must be self-contained and renderable. It must be compliant with industry standards (e.g., ISO 1219 for hydraulics). Include labels, component identifiers, and clear connection lines.
-    - For DTC / Fault Code lookups, provide a Markdown table with columns: 'Code', 'Description', 'Potential Causes', and 'Troubleshooting Steps'.`;
+    - Đối với dữ liệu dạng văn bản (ví dụ: Hướng dẫn sửa chữa, Danh mục phụ tùng, Lịch bảo dưỡng), hãy cung cấp thông tin chính dưới dạng Markdown có cấu trúc tốt. Sử dụng bảng, danh sách và chữ in đậm.
+    - Đối với các sơ đồ (ví dụ: Sơ đồ dây điện, Mạch thủy lực, Hệ thống khí nén, Logic ECU), bạn PHẢI tạo ra một hình ảnh SVG hợp lệ và chi tiết. SVG phải khép kín và có thể hiển thị được. Sơ đồ phải tuân thủ các tiêu chuẩn ngành (ví dụ: ISO 1219 cho thủy lực). Bao gồm nhãn, mã định danh thành phần và các đường kết nối rõ ràng.
+    - Đối với tra cứu "Bảng mã lỗi", hãy cung cấp một bảng Markdown với các cột: 'Mã', 'Mô tả', 'Nguyên nhân tiềm ẩn' và 'Các bước khắc phục sự cố'.`;
 
-  if (requestType === 'DTC / Fault Code Manual' && errorCode) {
-    detail = `The user specifically wants details for fault code "${errorCode}" from the DTC manual for a "${vehicleModel}".`
+  if (requestType === 'Bảng mã lỗi' && errorCode) {
+    detail = `Người dùng muốn biết chi tiết cụ thể cho mã lỗi "${errorCode}" từ tài liệu "Bảng mã lỗi" cho xe "${vehicleModel}".`
   }
 
-  return `You are an expert AI technical service assistant with access to a comprehensive database of OEM technical documents. Your task is to look up and extract the requested information and present it in the specified format.
+  return `Bạn là một trợ lý dịch vụ kỹ thuật AI chuyên nghiệp có quyền truy cập vào cơ sở dữ liệu toàn diện về tài liệu kỹ thuật của các hãng sản xuất (OEM). Nhiệm vụ của bạn là tra cứu và trích xuất thông tin được yêu cầu, sau đó trình bày nó ở định dạng được chỉ định.
 
-Request Details:
+Chi tiết yêu cầu:
 ${detail}
 
-Output Format Requirements:
-Your entire response must be a single block of text containing ONLY the requested content (Markdown or SVG). Do not add any conversational text, introductions, or XML/HTML wrappers beyond the SVG itself.
+Yêu cầu về định dạng đầu ra:
+Toàn bộ phản hồi của bạn phải là một khối văn bản duy nhất CHỈ chứa nội dung được yêu cầu (dạng Markdown hoặc SVG). Không thêm bất kỳ văn bản trò chuyện, giới thiệu, hay thẻ XML/HTML nào khác ngoài chính SVG.
 ${formatInstruction}
 
-Generate the content now. Ensure it's accurate, detailed, and professionally formatted for a technician.`;
+Hãy tạo nội dung ngay bây giờ. Đảm bảo rằng nội dung chính xác, chi tiết và được định dạng chuyên nghiệp cho một kỹ thuật viên.`;
 }
 
 
