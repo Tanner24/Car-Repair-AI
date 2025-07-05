@@ -28,19 +28,19 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Label } from "@/components/ui/label";
 
 const technicalDiagrams = [
-    { value: "Wiring Diagram", label: "Sơ đồ dây điện (Wiring Diagram)" },
-    { value: "Hydraulic Circuit", label: "Mạch thủy lực (Hydraulic Circuit)" },
-    { value: "Pneumatic System", label: "Hệ thống khí nén (Pneumatic System)" },
-    { value: "ECU Logic Flow", label: "Logic điều khiển ECU (ECU Logic Flow)" },
+    { value: "Sơ đồ dây điện", label: "Sơ đồ dây điện (Wiring Diagram)" },
+    { value: "Mạch thủy lực", label: "Mạch thủy lực (Hydraulic Circuit)" },
+    { value: "Hệ thống khí nén", label: "Hệ thống khí nén (Pneumatic System)" },
+    { value: "Logic điều khiển ECU", label: "Logic điều khiển ECU (ECU Logic Flow)" },
 ];
   
 const repairData = [
-    { value: "Service Manual", label: "Hướng dẫn sửa chữa (Service Manual)" },
-    { value: "DTC / Fault Code Manual", label: "Bảng mã lỗi (DTC Manual)" },
-    { value: "Maintenance Schedule", label: "Lịch bảo dưỡng (Maintenance Schedule)" },
-    { value: "Operator Manual", label: "Hướng dẫn vận hành (Operator Manual)" },
-    { value: "Technical Bulletin / TSB", label: "Bản tin kỹ thuật (TSB)" },
-    { value: "Parts Catalog", label: "Danh mục phụ tùng (Parts Catalog)" },
+    { value: "Hướng dẫn sửa chữa", label: "Hướng dẫn sửa chữa (Service Manual)" },
+    { value: "Bảng mã lỗi", label: "Bảng mã lỗi (DTC Manual)" },
+    { value: "Lịch bảo dưỡng", label: "Lịch bảo dưỡng (Maintenance Schedule)" },
+    { value: "Hướng dẫn vận hành", label: "Hướng dẫn vận hành (Operator Manual)" },
+    { value: "Bản tin kỹ thuật", label: "Bản tin kỹ thuật (TSB)" },
+    { value: "Danh mục phụ tùng", label: "Danh mục phụ tùng (Parts Catalog)" },
 ];
 
 export function LookupTool() {
@@ -110,7 +110,7 @@ export function LookupTool() {
               value={requestType} 
               onValueChange={(value) => {
                 setRequestType(value);
-                if (value !== "DTC / Fault Code Manual") {
+                if (value !== "Bảng mã lỗi") {
                     setErrorCode("");
                 }
               }} 
@@ -141,7 +141,7 @@ export function LookupTool() {
           </div>
         </div>
 
-        {requestType === 'DTC / Fault Code Manual' && (
+        {requestType === 'Bảng mã lỗi' && (
             <div className="space-y-2 mb-6">
                 <Label htmlFor="error-code-input">Mã lỗi (Tùy chọn)</Label>
                 <Input
