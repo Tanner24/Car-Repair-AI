@@ -1,7 +1,9 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useRef } from "react";
 import ReactMarkdown from 'react-markdown';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 import {
   Card,
   CardContent,
@@ -21,7 +23,7 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { AlertCircle, Loader2, Sparkles } from "lucide-react";
+import { AlertCircle, Loader2, Sparkles, Download } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import Link from "next/link";
 import { generateTechnicalData, GenerateTechnicalDataInput, GenerateTechnicalDataOutput } from "@/ai/flows/schematic-generation-flow";
@@ -50,6 +52,8 @@ export function LookupTool() {
   const [generatedOutput, setGeneratedOutput] = useState<GenerateTechnicalDataOutput | null>(null);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const [isDownloading, setIsDownloading] = useState(false);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   const handleGenerate = () => {
     setGeneratedOutput(null);
@@ -82,6 +86,53 @@ export function LookupTool() {
       }
     });
   };
+
+  const handleDownloadPdf = () => {
+    if (!contentRef.current) {
+        setError("Không tìm thấy nội dung để tạo PDF.");
+        return;
+    }
+
+    setIsDownloading(true);
+    setError(null);
+
+    setTimeout(() => {
+        html2canvas(contentRef.current!, {
+            scale: 2,
+            useCORS: true,
+            backgroundColor: '#ffffff',
+        }).then(canvas => {
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = pdf.internal.pageSize.getHeight();
+            const canvasWidth = canvas.width;
+            const canvasHeight = canvas.height;
+            const canvasRatio = canvasWidth / canvasHeight;
+            const pdfRatio = pdfWidth / pdfHeight;
+
+            let newCanvasWidth = pdfWidth;
+            let newCanvasHeight = newCanvasWidth / canvasRatio;
+
+            if (newCanvasHeight > pdfHeight) {
+                newCanvasHeight = pdfHeight;
+                newCanvasWidth = newCanvasHeight * canvasRatio;
+            }
+
+            const x = (pdfWidth - newCanvasWidth) / 2;
+            const y = (pdfHeight - newCanvasHeight) / 2;
+
+            pdf.addImage(imgData, 'PNG', x, y, newCanvasWidth, newCanvasHeight);
+            pdf.save(`TKKT-${model.replace(/\s+/g, '_')}-${requestType.replace(/\s/g, '_')}.pdf`);
+        }).catch(err => {
+            console.error("PDF generation failed", err);
+            setError("Không thể tạo tệp PDF.");
+        }).finally(() => {
+            setIsDownloading(false);
+        });
+    }, 100);
+  };
+
 
   return (
     <Card>
@@ -131,7 +182,7 @@ export function LookupTool() {
           </div>
         </div>
         
-        <div className="w-full h-[60vh] border rounded-lg overflow-hidden bg-muted/50 p-4 flex items-center justify-center">
+        <div ref={contentRef} className="w-full h-[60vh] border rounded-lg overflow-hidden bg-muted/50 p-4 flex items-center justify-center">
             {isPending ? (
                  <div className="flex flex-col items-center gap-2 text-muted-foreground">
                     <Loader2 className="h-8 w-8 animate-spin" />
@@ -141,7 +192,7 @@ export function LookupTool() {
                 generatedOutput.outputType === 'svg' ? (
                     <ScrollArea className="w-full h-full bg-white rounded-md">
                         <div
-                            className="w-full h-full p-4 [&>svg]:w-full [&>svg]:h-full"
+                            className="w-full h-full p-4 [&>svg]:max-w-full [&>svg]:h-auto"
                             dangerouslySetInnerHTML={{ __html: generatedOutput.content }}
                         />
                     </ScrollArea>
@@ -178,7 +229,7 @@ export function LookupTool() {
             </Alert>
         )}
       </CardContent>
-      <CardFooter>
+      <CardFooter className="justify-start">
           <Button onClick={handleGenerate} disabled={isPending || !model.trim()} className="bg-accent hover:bg-accent/90">
             {isPending ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -187,6 +238,21 @@ export function LookupTool() {
             )}
             Tra cứu
           </Button>
+          {generatedOutput && (
+            <Button
+                onClick={handleDownloadPdf}
+                disabled={isDownloading || isPending}
+                variant="outline"
+                className="ml-4"
+              >
+                {isDownloading ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Download className="mr-2 h-4 w-4" />
+                )}
+                Tải xuống PDF
+              </Button>
+          )}
       </CardFooter>
     </Card>
   );
