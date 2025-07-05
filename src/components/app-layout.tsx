@@ -19,6 +19,7 @@ import {
   CalendarCheck,
   User,
   Settings,
+  MessageCircle,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
@@ -54,6 +55,11 @@ const navItems = [
     href: "/maintenance",
     icon: CalendarCheck,
     label: "Bảo trì",
+  },
+  {
+    href: "/chatbot",
+    icon: MessageCircle,
+    label: "Chatbot",
   },
   {
     href: "/settings",
@@ -95,8 +101,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           </SidebarMenu>
         </SidebarContent>
       </Sidebar>
-      <SidebarInset className="p-4 md:p-6 lg:p-8">
-        <header className="flex items-center justify-between mb-6">
+      <SidebarInset className="flex flex-col h-svh p-4 md:p-6 lg:p-8">
+        <header className="flex items-center justify-between mb-6 shrink-0">
           <SidebarTrigger className="md:hidden" />
           <div className="flex-1" />
           <DropdownMenu>
@@ -129,7 +135,9 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             </DropdownMenuContent>
           </DropdownMenu>
         </header>
-        {children}
+        <div className="flex-1 flex flex-col min-h-0">
+          {children}
+        </div>
       </SidebarInset>
     </SidebarProvider>
   );
