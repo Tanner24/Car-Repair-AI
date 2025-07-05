@@ -1,10 +1,10 @@
 'use server';
 /**
- * @fileOverview AI flow for looking up and generating images of technical vehicle documents.
+ * @fileOverview AI flow for looking up and extracting technical vehicle documents.
  *
- * - generateTechnicalData - A function that handles the technical data image generation process.
- * - GenerateTechnicalDataInput - The input type for the generateTechnicalData function.
- * - GenerateTechnicalDataOutput - The return type for the generateTechnicalData function.
+ * - lookupTechnicalData - A function that handles the technical data lookup process.
+ * - TechnicalLookupInput - The input type for the lookupTechnicalData function.
+ * - TechnicalLookupOutput - The return type for the lookupTechnicalData function.
  */
 
 import {genkit} from 'genkit';
@@ -24,54 +24,64 @@ const requestTypes = [
   "Technical Bulletin / TSB"
 ] as const;
 
-const GenerateTechnicalDataInputSchema = z.object({
+export const TechnicalLookupInputSchema = z.object({
   vehicleModel: z.string().describe('The model of the construction vehicle.'),
   requestType: z.enum(requestTypes).describe('The type of diagram or data to generate.'),
-  errorCode: z.string().optional().describe('An optional error code to look up.'),
+  errorCode: z.string().optional().describe('An optional error code to look up if the request type is for a DTC manual.'),
   apiKey: z.string().min(1, { message: 'API Key is required.' }),
   apiEndpoint: z.string().optional(),
 });
-export type GenerateTechnicalDataInput = z.infer<typeof GenerateTechnicalDataInputSchema>;
+export type TechnicalLookupInput = z.infer<typeof TechnicalLookupInputSchema>;
 
-const GenerateTechnicalDataOutputSchema = z.object({
-  imageDataUri: z.string().describe("The generated image of the technical document as a data URI."),
+const TechnicalLookupOutputSchema = z.object({
+  content: z.string().describe("The looked-up technical content, formatted as Markdown. For diagrams, this will be an SVG string. For data, it will be tables and text."),
 });
-export type GenerateTechnicalDataOutput = z.infer<typeof GenerateTechnicalDataOutputSchema>;
+export type TechnicalLookupOutput = z.infer<typeof TechnicalLookupOutputSchema>;
 
-function getGenerationPrompt(input: GenerateTechnicalDataInput): string {
-    const { vehicleModel, requestType, errorCode } = input;
+function getLookupPrompt(input: TechnicalLookupInput): string {
+  const { vehicleModel, requestType, errorCode } = input;
 
-    let detail = `The page must clearly display a detailed "${requestType}".`;
-    if (requestType === 'DTC / Fault Code Manual' && errorCode) {
-        detail = `It must specifically show the troubleshooting steps for fault code "${errorCode}".`
-    }
+  let detail = `The user wants the "${requestType}" for a "${vehicleModel}".`;
+  let formatInstruction = `
+    - For textual data (Service Manuals, Parts Catalogs, Maintenance Schedules), provide key information in well-structured Markdown. Use tables, lists, and bold text.
+    - For diagrams (Wiring, Hydraulic, Pneumatic, ECU Logic), you MUST generate a valid, detailed SVG image. The SVG must be self-contained and renderable. It must be compliant with industry standards (e.g., ISO 1219 for hydraulics). Include labels, component identifiers, and clear connection lines.
+    - For DTC / Fault Code lookups, provide a Markdown table with columns: 'Code', 'Description', 'Potential Causes', and 'Troubleshooting Steps'.`;
 
-    return `Generate a photorealistic image of a page from an official technical service manual for a "${vehicleModel}".
+  if (requestType === 'DTC / Fault Code Manual' && errorCode) {
+    detail = `The user specifically wants details for fault code "${errorCode}" from the DTC manual for a "${vehicleModel}".`
+  }
+
+  return `You are an expert AI technical service assistant with access to a comprehensive database of OEM technical documents. Your task is to look up and extract the requested information and present it in the specified format.
+
+Request Details:
 ${detail}
-The style should be that of a clean, high-resolution scan of a printed manual.
-It should contain intricate diagrams, text annotations, and part numbers, all in crisp black and white line art.
-The layout must be dense, professional, and highly technical.
-Do not include any colors or photographic elements, only technical drawings and text as found in a real service manual. The image should look like a real document.`;
+
+Output Format Requirements:
+Your entire response must be a single block of text containing ONLY the requested content (Markdown or SVG). Do not add any conversational text, introductions, or XML/HTML wrappers beyond the SVG itself.
+${formatInstruction}
+
+Generate the content now. Ensure it's accurate, detailed, and professionally formatted for a technician.`;
 }
 
-export async function generateTechnicalData(input: GenerateTechnicalDataInput): Promise<GenerateTechnicalDataOutput> {
-    const keyAi = genkit({
-      plugins: [googleAI({ apiKey: input.apiKey, ...(input.apiEndpoint && { apiEndpoint: input.apiEndpoint }) })],
-    });
 
-    const prompt = getGenerationPrompt(input);
-    
-    const {media} = await keyAi.generate({
-      model: 'googleai/gemini-2.0-flash-preview-image-generation',
-      prompt: prompt,
-      config: {
-        responseModalities: ['TEXT', 'IMAGE'],
-      },
-    });
+export async function lookupTechnicalData(input: TechnicalLookupInput): Promise<TechnicalLookupOutput> {
+  const keyAi = genkit({
+    plugins: [googleAI({ apiKey: input.apiKey, ...(input.apiEndpoint && { apiEndpoint: input.apiEndpoint }) })],
+  });
 
-    if (!media || !media.url) {
-        throw new Error('Image generation failed to produce an image.');
-    }
-    
-    return { imageDataUri: media.url };
+  const prompt = getLookupPrompt(input);
+  
+  const { output } = await keyAi.generate({
+    model: 'googleai/gemini-2.0-flash',
+    prompt: prompt,
+    output: {
+      schema: TechnicalLookupOutputSchema,
+    },
+  });
+
+  if (!output || !output.content) {
+      throw new Error('AI failed to lookup or generate the technical content.');
+  }
+  
+  return output;
 }

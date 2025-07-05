@@ -1,8 +1,6 @@
 "use client";
 
-import { useState, useTransition, useRef } from "react";
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
+import { useState, useTransition } from "react";
 import {
   Card,
   CardContent,
@@ -22,24 +20,18 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { AlertCircle, Loader2, Sparkles, Download, ZoomIn } from "lucide-react";
+import { AlertCircle, Loader2, Sparkles } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import Link from "next/link";
-import { generateTechnicalData, GenerateTechnicalDataInput, GenerateTechnicalDataOutput } from "@/ai/flows/schematic-generation-flow";
+import { lookupTechnicalData, TechnicalLookupInput, TechnicalLookupOutput } from "@/ai/flows/schematic-generation-flow";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Label } from "@/components/ui/label";
-import {
-    Dialog,
-    DialogContent,
-    DialogTrigger,
-  } from "@/components/ui/dialog";
 
 const technicalDiagrams = [
     { value: "Wiring Diagram", label: "Sơ đồ dây điện (Wiring Diagram)" },
     { value: "Hydraulic Circuit", label: "Mạch thủy lực (Hydraulic Circuit)" },
     { value: "Pneumatic System", label: "Hệ thống khí nén (Pneumatic System)" },
     { value: "ECU Logic Flow", label: "Logic điều khiển ECU (ECU Logic Flow)" },
-    { value: "Parts Catalog", label: "Danh mục phụ tùng (Parts Catalog)" },
 ];
   
 const repairData = [
@@ -48,17 +40,16 @@ const repairData = [
     { value: "Maintenance Schedule", label: "Lịch bảo dưỡng (Maintenance Schedule)" },
     { value: "Operator Manual", label: "Hướng dẫn vận hành (Operator Manual)" },
     { value: "Technical Bulletin / TSB", label: "Bản tin kỹ thuật (TSB)" },
+    { value: "Parts Catalog", label: "Danh mục phụ tùng (Parts Catalog)" },
 ];
 
 export function LookupTool() {
   const [model, setModel] = useState("");
   const [requestType, setRequestType] = useState(technicalDiagrams[0].value);
   const [errorCode, setErrorCode] = useState("");
-  const [generatedOutput, setGeneratedOutput] = useState<GenerateTechnicalDataOutput | null>(null);
+  const [generatedOutput, setGeneratedOutput] = useState<TechnicalLookupOutput | null>(null);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
-  const [isDownloading, setIsDownloading] = useState(false);
-  const contentRef = useRef<HTMLDivElement>(null);
 
   const handleGenerate = () => {
     setGeneratedOutput(null);
@@ -78,14 +69,14 @@ export function LookupTool() {
 
     startTransition(async () => {
       try {
-        const input: GenerateTechnicalDataInput = {
+        const input: TechnicalLookupInput = {
           vehicleModel: model,
           requestType: requestType as any,
           errorCode: errorCode || undefined,
           apiKey: apiKey,
           apiEndpoint: apiEndpoint ? apiEndpoint : undefined,
         };
-        const result = await generateTechnicalData(input);
+        const result = await lookupTechnicalData(input);
         setGeneratedOutput(result);
       } catch (e) {
         setError(e instanceof Error ? e.message : "Đã xảy ra lỗi không xác định khi tra cứu tài liệu.");
@@ -93,59 +84,12 @@ export function LookupTool() {
     });
   };
 
-  const handleDownloadPdf = () => {
-    if (!contentRef.current) {
-        setError("Không tìm thấy nội dung để tạo PDF.");
-        return;
-    }
-
-    setIsDownloading(true);
-    setError(null);
-
-    setTimeout(() => {
-        html2canvas(contentRef.current!, {
-            scale: 2,
-            useCORS: true,
-            backgroundColor: '#ffffff',
-        }).then(canvas => {
-            const imgData = canvas.toDataURL('image/png');
-            const pdf = new jsPDF('p', 'mm', 'a4');
-            const pdfWidth = pdf.internal.pageSize.getWidth();
-            const pdfHeight = pdf.internal.pageSize.getHeight();
-            const canvasWidth = canvas.width;
-            const canvasHeight = canvas.height;
-            const canvasRatio = canvasWidth / canvasHeight;
-            const pdfRatio = pdfWidth / pdfHeight;
-
-            let newCanvasWidth = pdfWidth;
-            let newCanvasHeight = newCanvasWidth / canvasRatio;
-
-            if (newCanvasHeight > pdfHeight) {
-                newCanvasHeight = pdfHeight;
-                newCanvasWidth = newCanvasHeight * canvasRatio;
-            }
-
-            const x = (pdfWidth - newCanvasWidth) / 2;
-            const y = (pdfHeight - newCanvasHeight) / 2;
-
-            pdf.addImage(imgData, 'PNG', x, y, newCanvasWidth, newCanvasHeight);
-            pdf.save(`TKKT-${model.replace(/\s+/g, '_')}-${requestType.replace(/\s/g, '_')}.pdf`);
-        }).catch(err => {
-            console.error("PDF generation failed", err);
-            setError("Không thể tạo tệp PDF.");
-        }).finally(() => {
-            setIsDownloading(false);
-        });
-    }, 100);
-  };
-
-
   return (
     <Card>
       <CardHeader>
         <CardTitle>Công cụ tra cứu</CardTitle>
         <CardDescription>
-          Nhập một kiểu xe và chọn loại tài liệu bạn muốn tra cứu, AI sẽ trả về hình ảnh của tài liệu đó.
+          Nhập một kiểu xe và chọn loại tài liệu bạn muốn tra cứu. AI sẽ trích xuất tài liệu gốc và hiển thị nội dung.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -217,39 +161,15 @@ export function LookupTool() {
                     <p>AI đang tra cứu tài liệu... việc này có thể mất một lúc.</p>
                  </div>
             ) : generatedOutput ? (
-                <Dialog>
-                    <div className="relative w-full h-full group">
-                        <div ref={contentRef} className="w-full h-full bg-white rounded-md">
-                            <ScrollArea className="w-full h-full">
-                            <div className="flex items-center justify-center min-h-full p-4">
-                                <img
-                                    src={generatedOutput.imageDataUri}
-                                    alt={`${requestType} for ${model}`}
-                                    className="w-full h-auto object-contain"
-                                />
-                            </div>
-                            </ScrollArea>
-                        </div>
-                        <DialogTrigger asChild>
-                            <Button variant="outline" size="icon" className="absolute top-2 right-2 bg-background/50 backdrop-blur-sm hover:bg-background/75">
-                                <ZoomIn className="h-5 w-5" />
-                                <span className="sr-only">Phóng to</span>
-                            </Button>
-                        </DialogTrigger>
-                    </div>
-                    <DialogContent className="max-w-6xl h-[90vh] p-2">
-                        <ScrollArea className="w-full h-full">
-                            <img
-                                src={generatedOutput.imageDataUri}
-                                alt={`${requestType} for ${model}`}
-                                className="w-full h-auto object-contain"
-                            />
-                        </ScrollArea>
-                    </DialogContent>
-                </Dialog>
+                <ScrollArea className="w-full h-full bg-white rounded-md p-4">
+                   <div
+                    className="prose prose-sm max-w-none [&_svg]:max-w-full [&_svg]:h-auto"
+                    dangerouslySetInnerHTML={{ __html: generatedOutput.content }}
+                   />
+                </ScrollArea>
             ) : (
                 <div className="text-center text-muted-foreground">
-                    <p>Hình ảnh tài liệu do AI tra cứu sẽ xuất hiện ở đây.</p>
+                    <p>Nội dung tài liệu do AI tra cứu sẽ xuất hiện ở đây.</p>
                 </div>
             )}
         </div>
@@ -278,21 +198,6 @@ export function LookupTool() {
             )}
             Tra cứu
           </Button>
-          {generatedOutput && (
-            <Button
-                onClick={handleDownloadPdf}
-                disabled={isDownloading || isPending}
-                variant="outline"
-                className="ml-4"
-              >
-                {isDownloading ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <Download className="mr-2 h-4 w-4" />
-                )}
-                Tải xuống PDF
-              </Button>
-          )}
       </CardFooter>
     </Card>
   );
