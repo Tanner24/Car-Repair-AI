@@ -43,7 +43,8 @@ function getLookupPrompt(input: TechnicalLookupInput): string {
 
   let detail = `Người dùng muốn có tài liệu "${requestType}" cho xe "${vehicleModel}".`;
   let formatInstruction = `
-    - Đối với dữ liệu dạng văn bản (ví dụ: Hướng dẫn sửa chữa, Danh mục phụ tùng, Lịch bảo dưỡng), hãy cung cấp thông tin chính dưới dạng Markdown có cấu trúc tốt. Sử dụng bảng, danh sách và chữ in đậm.
+    - Đối với "Danh mục phụ tùng", bạn PHẢI tạo một bảng Markdown chi tiết với các cột: 'Mã phụ tùng', 'Tên phụ tùng', 'Số lượng', và 'Ghi chú'.
+    - Đối với dữ liệu dạng văn bản khác (ví dụ: Hướng dẫn sửa chữa, Lịch bảo dưỡng), hãy cung cấp thông tin chính dưới dạng Markdown có cấu trúc tốt, sử dụng bảng, danh sách và các định dạng cần thiết.
     - Đối với các sơ đồ (ví dụ: Sơ đồ dây điện, Mạch thủy lực, Hệ thống khí nén, Logic ECU), bạn PHẢI tạo ra một hình ảnh SVG hợp lệ và chi tiết. SVG phải khép kín và có thể hiển thị được. Sơ đồ phải tuân thủ các tiêu chuẩn ngành (ví dụ: ISO 1219 cho thủy lực). Bao gồm nhãn, mã định danh thành phần và các đường kết nối rõ ràng.
     - Đối với tra cứu "Bảng mã lỗi", hãy cung cấp một bảng Markdown với các cột: 'Mã', 'Mô tả', 'Nguyên nhân tiềm ẩn' và 'Các bước khắc phục sự cố'.`;
 
