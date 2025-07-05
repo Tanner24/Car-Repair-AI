@@ -1,14 +1,14 @@
 import { PageHeader } from "@/components/page-header";
-import { SchematicsViewer } from "@/components/schematics-viewer";
+import { TechnicalDataViewer } from "@/components/schematics-viewer";
 
 export default function SchematicsPage() {
   return (
     <div className="flex flex-col gap-8">
       <PageHeader
-        title="Trình tạo sơ đồ AI"
-        description="Sử dụng AI để tạo sơ đồ dây và mạch thủy lực theo yêu cầu."
+        title="Dữ liệu Kỹ thuật AI"
+        description="Tạo sơ đồ kỹ thuật hoặc dữ liệu sửa chữa bằng AI theo yêu cầu."
       />
-      <SchematicsViewer />
+      <TechnicalDataViewer />
     </div>
   );
 }

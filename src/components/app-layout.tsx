@@ -50,7 +50,7 @@ const navItems = [
   {
     href: "/schematics",
     icon: CircuitBoard,
-    label: "Sơ đồ",
+    label: "Dữ liệu Kỹ thuật",
   },
   {
     href: "/maintenance",
