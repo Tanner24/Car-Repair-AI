@@ -100,7 +100,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             <div className="flex items-center gap-2">
               <Logo />
               <span className="text-lg font-semibold font-headline">
-                Chuyên gia xây dựng
+                Hệ Thống Tra Cứu Tài Liệu
               </span>
             </div>
           </SidebarHeader>
