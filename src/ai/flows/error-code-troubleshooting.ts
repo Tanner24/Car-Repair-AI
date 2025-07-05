@@ -8,7 +8,6 @@
  * - ErrorCodeTroubleshootingOutput - The return type for the errorCodeTroubleshooting function.
  */
 
-import {ai} from '@/ai/genkit';
 import {genkit} from 'genkit';
 import {googleAI} from '@genkit-ai/googleai';
 import {z} from 'genkit';
@@ -28,21 +27,11 @@ const ErrorCodeTroubleshootingOutputSchema = z.object({
 export type ErrorCodeTroubleshootingOutput = z.infer<typeof ErrorCodeTroubleshootingOutputSchema>;
 
 export async function errorCodeTroubleshooting(input: ErrorCodeTroubleshootingInput): Promise<ErrorCodeTroubleshootingOutput> {
-  return errorCodeTroubleshootingFlow(input);
-}
-
-const errorCodeTroubleshootingFlow = ai.defineFlow(
-  {
-    name: 'errorCodeTroubleshootingFlow',
-    inputSchema: ErrorCodeTroubleshootingInputSchema,
-    outputSchema: ErrorCodeTroubleshootingOutputSchema,
-  },
-  async (input) => {
-    const keyAi = genkit({
-      plugins: [googleAI({ apiKey: input.apiKey, ...(input.apiEndpoint && { apiEndpoint: input.apiEndpoint }) })],
-    });
-    
-    const prompt = `Bạn là một kỹ thuật viên chuyên nghiệp với 20 năm kinh nghiệm sửa chữa các loại xe công trình như Komatsu, Hitachi, Caterpillar, Doosan, Volvo và Hyundai.
+  const keyAi = genkit({
+    plugins: [googleAI({ apiKey: input.apiKey, ...(input.apiEndpoint && { apiEndpoint: input.apiEndpoint }) })],
+  });
+  
+  const prompt = `Bạn là một kỹ thuật viên chuyên nghiệp với 20 năm kinh nghiệm sửa chữa các loại xe công trình như Komatsu, Hitachi, Caterpillar, Doosan, Volvo và Hyundai.
 
   Người dùng đã cung cấp một mã lỗi từ một kiểu xe cụ thể. Nhiệm vụ của bạn là cung cấp thông tin chính xác, chi tiết và dễ hiểu về lỗi đó.
 
@@ -64,13 +53,12 @@ const errorCodeTroubleshootingFlow = ai.defineFlow(
   Cung cấp câu trả lời ngắn gọn nhưng toàn diện và đề xuất các mẹo sửa chữa bổ sung nếu cần.
   `;
 
-    const { output } = await keyAi.generate({
-      model: 'googleai/gemini-2.0-flash',
-      prompt: prompt,
-      output: {
-        schema: ErrorCodeTroubleshootingOutputSchema,
-      },
-    });
-    return output!;
-  }
-);
+  const { output } = await keyAi.generate({
+    model: 'googleai/gemini-2.0-flash',
+    prompt: prompt,
+    output: {
+      schema: ErrorCodeTroubleshootingOutputSchema,
+    },
+  });
+  return output!;
+}
